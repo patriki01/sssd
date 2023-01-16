@@ -71,7 +71,11 @@ class SambaHost(BaseLDAPDomainHost):
             samba-tool ntacl sysvolreset
 
             # systemctl finishes before samba is fully started, wait for it to start listening on ldap port
+<<<<<<< HEAD
             timeout 60s bash -c 'until netstat -ltp 2> /dev/null | grep :ldap &> /dev/null; do :; done'
+=======
+            timeout 5s bash -c 'until netstat -ltp 2> /dev/null | grep :ldap &> /dev/null; do :; done'
+>>>>>>> 5456762ae (tests: add system tests using pytest-mh framework)
         """
         )
         self.disconnect()

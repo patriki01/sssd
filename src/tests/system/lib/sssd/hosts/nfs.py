@@ -21,10 +21,19 @@ class NFSHost(BaseBackupHost):
 
     .. code-block:: yaml
         :caption: Example multihost configuration
+<<<<<<< HEAD
         :emphasize-lines: 4
 
         - hostname: nfs.test
           role: nfs
+=======
+        :emphasize-lines: 6
+
+        - hostname: nfs.test
+          role: nfs
+          username: root
+          password: Secret123
+>>>>>>> 5456762ae (tests: add system tests using pytest-mh framework)
           config:
             exports_dir: /dev/shm/exports
 

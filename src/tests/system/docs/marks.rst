@@ -69,12 +69,17 @@ traceability for enterprise releases.
 Additional markers
 ******************
 
+
 Besides the ``topology`` mark, that is required and that defines which hosts
 from the multihost configuration are relevant for the test, there are also other
 marks that you can use to enhance the testing experience.
 
 @pytest.mark.ticket
+<<<<<<< HEAD
 ===================
+=======
+*******************
+>>>>>>> 5456762ae (tests: add system tests using pytest-mh framework)
 
 The `ticket mark <https://github.com/next-actions/pytest-ticket>`__ can
 associate a test with Github issues and Bugzilla or JIRA tickets.
@@ -114,7 +119,11 @@ You can then run tests that are relevant only to the selected ticket:
     pytest --mh-config=mhc.yaml --mh-lazy-ssh -v --ticket=gh#3433
 
 @pytest.mark.tier
+<<<<<<< HEAD
 =================
+=======
+*****************
+>>>>>>> 5456762ae (tests: add system tests using pytest-mh framework)
 
 The `tier mark <https://github.com/next-actions/pytest-tier>`__ can
 associate a test with a specific tier.
@@ -150,5 +159,13 @@ Tier definition
 
     * - Tier
       - Description
+<<<<<<< HEAD
     * - @TODO
+=======
+    * - 0
+      -
+    * - 1
+      -
+    * - 2
+>>>>>>> 5456762ae (tests: add system tests using pytest-mh framework)
       -

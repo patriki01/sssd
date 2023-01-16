@@ -297,6 +297,7 @@ def test_sudo__runasuser_fqn(client: Client, provider: GenericProvider):
         1. User is able to run /bin/ls as "user-2"
     :customerscenario: False
 
+
     Note: This test can not run on IPA since it does not allow fully qualified name here.
     """
     u1 = provider.user("user-1").add()

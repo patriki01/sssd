@@ -24,6 +24,11 @@ class KDCHost(BaseDomainHost):
 
         - hostname: kdc.test
           role: kdc
+<<<<<<< HEAD
+=======
+          username: root
+          password: Secret123
+>>>>>>> 5456762ae (tests: add system tests using pytest-mh framework)
           config:
             realm: TEST
             domain: test

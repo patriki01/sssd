@@ -25,6 +25,11 @@ class IPAHost(BaseDomainHost):
 
         - hostname: master.ipa.test
           role: ipa
+<<<<<<< HEAD
+=======
+          username: root
+          password: Secret123
+>>>>>>> 5456762ae (tests: add system tests using pytest-mh framework)
           config:
             adminpw: Secret123
             client:

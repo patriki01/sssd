@@ -11,6 +11,7 @@ Basic definition
 .. code-block:: yaml
 
     domains:
+
     - id: <domain id>
       hosts:
       - hostname: <dns host name>
@@ -38,6 +39,7 @@ has ``id`` attribute and defines the list of available hosts.
   * ``ssh.password``: ssh password for the user, defaults to ``Secret123``
   * ``config``: additional configuration, place for custom options, see :ref:`custom-config`
   * ``artifacts``: list of artifacts that are automatically downloaded, see :ref:`gathering-artifacts`
+
 
 .. _available-roles:
 

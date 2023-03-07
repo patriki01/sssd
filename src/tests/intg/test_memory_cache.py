@@ -358,6 +358,8 @@ def zero_timeout_rfc2307(request, ldap_conn):
     return None
 
 
+@pytest.mark.converted('test_id.py', 'test_id__getpwuid')
+@pytest.mark.converted('test_id.py', 'test_id__getpwnam')
 def test_getpwnam(ldap_conn, sanity_rfc2307):
     ent.assert_passwd_by_name(
         'user1',
@@ -441,12 +443,15 @@ def test_getpwnam(ldap_conn, sanity_rfc2307):
              gecos='1023', shell='/bin/bash'))
 
 
+@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__getpwnam')
 def test_getpwnam_with_mc(ldap_conn, sanity_rfc2307):
     test_getpwnam(ldap_conn, sanity_rfc2307)
     stop_sssd()
     test_getpwnam(ldap_conn, sanity_rfc2307)
 
 
+@pytest.mark.converted('test_id.py', 'test_id__getgrgid')
+@pytest.mark.converted('test_id.py', 'test_id__getgrnam')
 def test_getgrnam_simple(ldap_conn, sanity_rfc2307):
     ent.assert_group_by_name("group1", dict(name="group1", gid=2001))
     ent.assert_group_by_gid(2001, dict(name="group1", gid=2001))
@@ -467,18 +472,21 @@ def test_getgrnam_simple(ldap_conn, sanity_rfc2307):
     ent.assert_group_by_gid(2020, dict(name="group2x", gid=2020))
 
 
+@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__getgrnam')
 def test_getgrnam_simple_with_mc(ldap_conn, sanity_rfc2307):
     test_getgrnam_simple(ldap_conn, sanity_rfc2307)
     stop_sssd()
     test_getgrnam_simple(ldap_conn, sanity_rfc2307)
 
 
+@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__getgrnam_disabled_passwd')
 def test_getgrnam_simple_disabled_pwd_mc(ldap_conn, disable_pwd_mc_rfc2307):
     test_getgrnam_simple(ldap_conn, disable_pwd_mc_rfc2307)
     stop_sssd()
     test_getgrnam_simple(ldap_conn, disable_pwd_mc_rfc2307)
 
 
+@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__getgrnam_disabled_intitgroups')
 def test_getgrnam_simple_disabled_intitgr_mc(ldap_conn,
                                              disable_initgr_mc_rfc2307):
     test_getgrnam_simple(ldap_conn, disable_initgr_mc_rfc2307)
@@ -486,6 +494,8 @@ def test_getgrnam_simple_disabled_intitgr_mc(ldap_conn,
     test_getgrnam_simple(ldap_conn, disable_initgr_mc_rfc2307)
 
 
+@pytest.mark.converted('test_id.py', 'test_id__membership_by_group_id')
+@pytest.mark.converted('test_id.py', 'test_id__membership_by_group_name')
 def test_getgrnam_membership(ldap_conn, sanity_rfc2307):
     ent.assert_group_by_name(
         "group1",
@@ -530,6 +540,8 @@ def test_getgrnam_membership(ldap_conn, sanity_rfc2307):
         dict(mem=ent.contains_only("user21", "user22", "user23")))
 
 
+@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__membership_by_group_id')
+@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__membership_by_group_name')
 def test_getgrnam_membership_with_mc(ldap_conn, sanity_rfc2307):
     test_getgrnam_membership(ldap_conn, sanity_rfc2307)
     stop_sssd()
@@ -568,6 +580,8 @@ def test_initgroups_with_mc(ldap_conn, sanity_rfc2307):
     test_initgroups(ldap_conn, sanity_rfc2307)
 
 
+@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__getpwnam_fully_qualified_names')
+@pytest.mark.converted('test_id.py', 'test_id__getpwnam_fully_qualified_names')
 def test_initgroups_fqname_with_mc(ldap_conn, fqname_rfc2307):
     assert_user_gids_equal('user1@LDAP', [2000, 2001])
     stop_sssd()

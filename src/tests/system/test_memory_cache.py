@@ -8,7 +8,6 @@ from lib.sssd.roles.samba import Samba
 from lib.sssd.topology import KnownTopology, KnownTopologyGroup
 
 
-# @pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__getpwnam')
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_memory_cache__getpwnam(client: Client, provider: GenericProvider):
     provider.user('user1').add(uid=1001)
@@ -29,7 +28,7 @@ def test_memory_cache__getpwnam(client: Client, provider: GenericProvider):
         assert result is not None
         assert result.user.name == user
 
-# @pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__getgrnam')
+
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_memory_cache__getgrnam(client: Client, provider: GenericProvider):
     provider.group('group1').add()
@@ -51,14 +50,13 @@ def test_memory_cache__getgrnam(client: Client, provider: GenericProvider):
         assert result.name == group
 
 
-# @pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__getgrnam_disabled_pwd')
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
-def test_memory_cache__getgrnam_disabled_pwd(client: Client, provider: GenericProvider):
+def test_memory_cache__getgrnam_disabled_passwd(client: Client, provider: GenericProvider):
     provider.group('group1').add()
     provider.group('group2').add()
     provider.group('group3').add()
 
-    client.sssd.nss['memcache_size_group'] = '0'
+    client.sssd.nss['memcache_size_passwd'] = '0'
     client.sssd.start()
 
     for group in ['group1', 'group2', 'group3']:
@@ -74,9 +72,8 @@ def test_memory_cache__getgrnam_disabled_pwd(client: Client, provider: GenericPr
         assert result.name == group
 
 
-# @pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__getgrnam_disabled_intitgr')
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
-def test_memory_cache__getgrnam_disabled_intitgr(client: Client, provider: GenericProvider):
+def test_memory_cache__getgrnam_disabled_intitgroups(client: Client, provider: GenericProvider):
     provider.group('group1').add()
     provider.group('group2').add()
     provider.group('group3').add()
@@ -97,9 +94,8 @@ def test_memory_cache__getgrnam_disabled_intitgr(client: Client, provider: Gener
         assert result.name == group
 
 
-# @pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__membership')
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
-def test_memory_cache__membership(client: Client, provider: GenericProvider):
+def test_memory_cache__membership_by_group_name(client: Client, provider: GenericProvider):
     u1 = provider.user('user1').add()
     u2 = provider.user('user2').add()
     u3 = provider.user('user3').add()
@@ -126,9 +122,9 @@ def test_memory_cache__membership(client: Client, provider: GenericProvider):
         if i == 0:
             client.sssd.stop()
 
-# @pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__users_by_gid')
+
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
-def test_memory_cache__users_by_gid(client: Client, provider: GenericProvider):
+def test_memory_cache__membership_by_group_id(client: Client, provider: GenericProvider):
     u1 = provider.user('user1').add()
     u2 = provider.user('user2').add()
     u3 = provider.user('user3').add()
@@ -155,7 +151,7 @@ def test_memory_cache__users_by_gid(client: Client, provider: GenericProvider):
         if i == 0:
             client.sssd.stop()
 
-# @pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__getpwnam_fully_qualified_names')
+
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_memory_cache__getpwnam_fully_qualified_names(client: Client, provider: GenericProvider):
     u1 = provider.user('user1').add()

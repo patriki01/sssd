@@ -8,7 +8,6 @@ from lib.sssd.roles.samba import Samba
 from lib.sssd.topology import KnownTopology, KnownTopologyGroup
 
 
-#@pytest.mark.converted('test_id.py', 'test_id__getpwnam')
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__getpwnam(client: Client, provider: GenericProvider):
     """
@@ -36,7 +35,6 @@ def test_id__getpwnam(client: Client, provider: GenericProvider):
         assert result.user.id == uid
 
 
-#@pytest.mark.converted('test_id.py', 'test_id__getpwuid')
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__getpwuid(client: Client, provider: GenericProvider):
     provider.user('user1').add(uid=1001)
@@ -52,7 +50,6 @@ def test_id__getpwuid(client: Client, provider: GenericProvider):
         assert result.user.id == uid
 
 
-#@pytest.mark.converted('test_id.py', 'test_id__getgrnam')
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__getgrnam(client: Client, provider: GenericProvider):
     provider.group('group1').add(gid=1001)
@@ -68,7 +65,6 @@ def test_id__getgrnam(client: Client, provider: GenericProvider):
         assert result.gid == gid
 
 
-#@pytest.mark.converted('test_id.py', 'test_id__getgrgid')
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__getgrgid(client: Client, provider: GenericProvider):
     provider.group('group1').add(gid=1001)
@@ -84,7 +80,6 @@ def test_id__getgrgid(client: Client, provider: GenericProvider):
         assert result.gid == gid
 
 
-#@pytest.mark.converted('test_id.py', 'test_id__membership')
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__membership_by_group_name(client: Client, provider: GenericProvider):
     u1 = provider.user('user1').add()
@@ -109,7 +104,6 @@ def test_id__membership_by_group_name(client: Client, provider: GenericProvider)
     assert result.memberof(['group2'])
 
 
-#@pytest.mark.converted('test_id.py', 'test_id__users_by_gid')
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__membership_by_group_id(client: Client, provider: GenericProvider):
     u1 = provider.user('user1').add()
@@ -135,7 +129,6 @@ def test_id__membership_by_group_id(client: Client, provider: GenericProvider):
     assert result.memberof([1002])
 
 
-#@pytest.mark.converted('test_id.py', 'test_id__getpwnam_fully_qualified_names')
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__getpwnam_fully_qualified_names(client: Client, provider: GenericProvider):
     u1 = provider.user('user1').add()

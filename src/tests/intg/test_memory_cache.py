@@ -560,6 +560,7 @@ def assert_user_gids_equal(user, expected_gids):
     )
 
 
+@pytest.mark.converted('test_id.py', 'test_id__user_gids')
 def test_initgroups(ldap_conn, sanity_rfc2307):
     assert_user_gids_equal('user1', [2000, 2001])
     assert_user_gids_equal('user2', [2000, 2002])
@@ -574,6 +575,7 @@ def test_initgroups(ldap_conn, sanity_rfc2307):
     assert_user_gids_equal('user23', [2020, 2003])
 
 
+@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__user_gids')
 def test_initgroups_with_mc(ldap_conn, sanity_rfc2307):
     test_initgroups(ldap_conn, sanity_rfc2307)
     stop_sssd()

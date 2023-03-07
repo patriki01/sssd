@@ -151,3 +151,61 @@ def test_id__getpwnam_fully_qualified_names(client: Client, provider: GenericPro
     result = client.tools.id('user2@test')
     assert result is not None
     assert result.user.name == 'user2@test'
+
+
+@pytest.mark.topology(KnownTopologyGroup.AnyProvider)
+def test_id__user_gids(client: Client, provider: GenericProvider):
+    u1 = provider.user('user1').add(gid=101)
+    u2 = provider.user('user2').add(gid=102)
+    u3 = provider.user('user3').add(gid=103)
+
+    provider.group('group1').add(gid=1001).add_member(u1)
+    provider.group('group2').add(gid=1002).add_members([u1, u2, u3])
+
+    client.sssd.start()
+
+    result = client.tools.id('user1')
+    assert result is not None
+    assert result.memberof([101, 1001, 1002])
+
+    result = client.tools.id('user2')
+    assert result is not None
+    assert result.memberof([102, 1002])
+
+    result = client.tools.id('user3')
+    assert result is not None
+    assert result.memberof([103, 1002])
+
+
+@pytest.mark.topology(KnownTopologyGroup.AnyProvider)
+def test_id__fq_names_case_insensitive(client: Client, provider: GenericProvider):
+    u1 = provider.user('user1').add(gid=101)
+    u2 = provider.user('user2').add(gid=102)
+    u3 = provider.user('user3').add(gid=103)
+
+    provider.group('group1').add(gid=1001).add_members([u1])
+    provider.group('group2').add(gid=1002).add_members([u1, u2])
+    provider.group('group3').add(gid=1003).add_members([u1, u2, u3])
+
+    client.sssd.domain['use_fully_qualified_names'] = 'true'
+    client.sssd.domain['case_sensitive'] = 'false'
+    client.sssd.start()
+
+    assert client.tools.id('user1') is None
+    assert client.tools.id('user2') is None
+
+    for name in ['User1@TesT', 'UseR1@TesT', 'UsER1@TesT']:
+        result = client.tools.id(name)
+        assert result is not None
+        assert result.memberof([101, 1001, 1002, 1003])
+
+    for name in ['uSer2@TeST', 'user2@TEsT', 'uSER2@tesT']:
+        result = client.tools.id(name)
+        assert result is not None
+        assert result.memberof([102, 1002, 1003])
+
+    for name in ['USer3@TeST', 'uSer3@TeST', 'USER3@Test']:
+        result = client.tools.id(name)
+        assert result is not None
+        assert result.memberof([103, 1003])
+    

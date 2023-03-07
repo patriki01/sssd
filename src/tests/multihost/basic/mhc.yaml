@@ -1,4 +1,4 @@
-root_password: 'vagrant'
+root_password: 'Secret123'
 domains:
 - name: tier0.tests
   type: sssd

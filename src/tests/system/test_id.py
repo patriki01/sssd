@@ -11,15 +11,19 @@ from lib.sssd.topology import KnownTopology, KnownTopologyGroup
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__getpwnam(client: Client, provider: GenericProvider):
     """
-    :title: Testing users by name.
+    :title: Resolving user with getpwnam by id() utility
     :setup:
         1. Add 'user1', 'user2' and 'user3' to SSSD
-        2. Start SSSD
+        2. Set their user ids
+        3. Start SSSD
     :steps:
-        1. Find users by name
-        2. Assert that their names and ids are correct
+        1. Find 'user1', 'user2' and 'user3' with id() by name
+        2. Check that result have correct names
+        3. Check that result have correct id
     :expectedresults:
-        1. Users have correct names set
+        1. Users are found
+        2. Users have correct names
+        3. Users have correct id
     :customerscenario: False
     """
     provider.user('user1').add(uid=1001)

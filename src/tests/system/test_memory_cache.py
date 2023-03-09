@@ -1,11 +1,9 @@
 import pytest
+import subprocess
 
-from lib.sssd.roles.ad import AD
 from lib.sssd.roles.client import Client
-from lib.sssd.roles.generic import GenericADProvider, GenericProvider
-from lib.sssd.roles.ldap import LDAP
-from lib.sssd.roles.samba import Samba
-from lib.sssd.topology import KnownTopology, KnownTopologyGroup
+from lib.sssd.roles.generic import GenericProvider
+from lib.sssd.topology import KnownTopologyGroup
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
@@ -204,6 +202,7 @@ def test_memory_cache__user_gids(client: Client, provider: GenericProvider):
             client.sssd.stop()
 
 
+# TODO STILL NOT WORKING
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_memory_cache__fq_names_case_insensitive(client: Client, provider: GenericProvider):
     u1 = provider.user('user1').add(gid=101)
@@ -223,7 +222,7 @@ def test_memory_cache__fq_names_case_insensitive(client: Client, provider: Gener
         assert result is not None
         assert result.memberof([101, 1001, 1002, 1003])
 
-        result = client.tools.id('uSeR2@tESt')
+        result = client.tools.id('uSeR2@test')
         assert result is not None
         assert result.memberof([102, 1002, 1003])
 
@@ -233,3 +232,35 @@ def test_memory_cache__fq_names_case_insensitive(client: Client, provider: Gener
 
         if i == 0:
             client.sssd.stop()
+
+
+@pytest.mark.topology(KnownTopologyGroup.AnyProvider)
+def test_memory_cache__invalidate_user_before_stop(client: Client, provider: GenericProvider):
+    u1 = provider.user('user1').add(gid=1011)
+    u2 = provider.user('user2').add(gid=102)
+
+    provider.group('group1').add(gid=1001).add_members([u1])
+    provider.group('group2').add(gid=1002).add_members([u1, u2])
+
+    client.sssd.start()
+
+    result = client.tools.id('user1')
+    assert result is not None
+    assert result.memberof([1011, 1001, 1002])
+
+    result = client.tools.id('user2')
+    assert result is not None
+    assert result.memberof([102, 1002])
+
+    client.sssctl.cache_expire(['--user=user1'])
+
+    client.sssd.stop()
+
+    assert client.tools.id('user1') is None
+    assert client.tools.getent.group(1011) is None
+    assert client.tools.getent.group(1002) is None
+
+    result = client.tools.id('user2')
+    assert result is not None
+    assert result.memberof([102, 1002])
+

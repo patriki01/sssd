@@ -625,6 +625,9 @@ def assert_stored_last_initgroups(user1_case1, user1_case2, user1_case_last,
     assert_initgroups_equal(user1_case_last, primary_gid, expected_gids)
 
 
+@pytest.mark.converted('test_id.py', 'test_id__fq_names_case_insensitive')
+@pytest.mark.converted('test_id.py', 'test_id__case_insensitive')
+@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__fq_names_case_insensitive')
 def test_initgroups_case_insensitive_with_mc1(ldap_conn,
                                               fqname_case_insensitive_rfc2307):
     user1_case1 = 'User1@LDAP'
@@ -637,8 +640,11 @@ def test_initgroups_case_insensitive_with_mc1(ldap_conn,
                                   primary_gid, expected_gids)
 
 
+@pytest.mark.converted('test_id.py', 'test_id__fq_names_case_insensitive')
+@pytest.mark.converted('test_id.py', 'test_id__case_insensitive')
+@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__fq_names_case_insensitive')
 def test_initgroups_case_insensitive_with_mc2(ldap_conn,
-                                              fqname_case_insensitive_rfc2307):
+                                              fqname_case_insensitive_rfc2307fqname_case_insensitive_rfc2307):
     user1_case1 = 'usEr1@LDAP'
     user1_case2 = 'User1@LDAP'
     user1_case_last = 'uSer1@LDAP'
@@ -649,6 +655,9 @@ def test_initgroups_case_insensitive_with_mc2(ldap_conn,
                                   primary_gid, expected_gids)
 
 
+@pytest.mark.converted('test_id.py', 'test_id__fq_names_case_insensitive')
+@pytest.mark.converted('test_id.py', 'test_id__case_insensitive')
+@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__fq_names_case_insensitive')
 def test_initgroups_case_insensitive_with_mc3(ldap_conn,
                                               fqname_case_insensitive_rfc2307):
     user1_case1 = 'uSer1@LDAP'

@@ -803,6 +803,7 @@ def assert_missing_mc_records_for_user1():
         "User user1, errno:%d" % err
 
 
+@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__invalidate_user_before_stop')
 def test_invalidate_user_before_stop(ldap_conn, sanity_rfc2307):
     # initialize cache with full ID
     (res, errno, _) = sssd_id.get_user_groups("user1")

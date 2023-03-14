@@ -17,7 +17,7 @@ def test_id__getpwnam(client: Client, provider: GenericProvider):
         2. Set their user ids
         3. Start SSSD
     :steps:
-        1. Find 'user1', 'user2' and 'user3' with id() by name
+        1. Find 'user1', 'user2' and 'user3' with id(name)
         2. Check that results have correct names
         3. Check that results have correct ids
     :expectedresults:
@@ -79,9 +79,9 @@ def test_id__getgrnam(client: Client, provider: GenericProvider):
         2. Set their group ids
         3. Start SSSD
     :steps:
-        1. Find 'group1', 'group2' and 'group3' with getent.group() by name
-        2. Check that results have correct names
-        3. Check that results have correct group ids
+        1. Find 'group1', 'group2' and 'group3' with getent.group(name)
+        2. Check that groups have correct names
+        3. Check that groups have correct group ids
     :expectedresults:
         1. Groups are found
         2. Groups have correct names
@@ -143,8 +143,8 @@ def test_id__membership_by_group_name(client: Client, provider: GenericProvider)
         4. Add 'user1', 'user2' and 'user3' to 'group2'
         3. Start SSSD
     :steps:
-        1. Find 'user1', 'user2' and 'user3' with id() by name
-        2. Check that results are members of correct groups using memberof([name])
+        1. Find 'user1', 'user2' and 'user3' with id(name)
+        2. Check that users are members of correct groups using memberof([name])
     :expectedresults:
         1. Users are found
         2. Users are members of correct groups
@@ -184,7 +184,7 @@ def test_id__membership_by_group_id(client: Client, provider: GenericProvider):
         5. Start SSSD
     :steps:
         1. Find 'user1', 'user2' and 'user3' with id(name)
-        2. Check that results are members of correct groups using memberof([gid])
+        2. Check that users are members of correct groups using memberof([gid])
     :expectedresults:
         1. Users are found
         2. Users are members of correct groups
@@ -258,14 +258,14 @@ def test_id__user_gids(client: Client, provider: GenericProvider):
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__getpwnam_fully_qualified_names(client: Client, provider: GenericProvider):
     """
-    :title: User can be resolved only by fq name when 'use_fully_qualified_names' is 'true'
+    :title: User can be resolved with id() only by fq name when 'use_fully_qualified_names' is 'true'
     :setup:
         1. Add 'user1' and 'user2' to SSSD
-        2. In sssd domain change 'use_fully_qualified_names' to 'true'
+        2. In SSSD domain change 'use_fully_qualified_names' to 'true'
         3. Start SSSD
     :steps:
         1. Find 'user1' and 'user2' with id(name)
-        2. Find 'user1' and 'user2' with id(name@domain) by full_name
+        2. Find 'user1' and 'user2' with id(name@domain)
         3. Check that results have correct full names
     :expectedresults:
         1. Users are not found
@@ -294,6 +294,26 @@ def test_id__getpwnam_fully_qualified_names(client: Client, provider: GenericPro
 #dont have converted mark
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__case_insensitive(client: Client, provider: GenericProvider):
+    """
+    :title: Resolving user by id() with case insensitive name when 'case_sensitive' is 'false'
+    :setup:
+        1. Add 'user1', 'user2' and 'user3' to SSSD
+        2. Set users group ids
+        3. Add 'group1', 'group2' and 'group3' to SSSD
+        4. Set them group ids.
+        5. Add members to the groups
+        6. In SSSD domain change 'case_sensitive' to 'false'
+        7. Start SSSD
+    :steps:
+        1. Find 'user1', 'user2' and 'user3' with id(name) - name is in random lower and upper case format
+        2. Check that usernames are correctly set
+        3. Check that users have correct groups
+    :expectedresults:
+        1. Users are found
+        2. Users have correct names
+        3. Users are members of correct groups
+    :customerscenario: False
+    """
     u1 = provider.user('user1').add(gid=101)
     u2 = provider.user('user2').add(gid=102)
     u3 = provider.user('user3').add(gid=103)
@@ -320,6 +340,27 @@ def test_id__case_insensitive(client: Client, provider: GenericProvider):
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__fq_names_case_insensitive(client: Client, provider: GenericProvider):
+    """
+    :title: Resolving user by id() with fq case insensitive name when 'case_sensitive' is 'false' 'and use_fully_qualified_names' is 'true'
+    :setup:
+        1. Add 'user1', 'user2' and 'user3' to SSSD
+        2. Set them group ids
+        3. Add 'group1', 'group2' and 'group3' to SSSD
+        4. Set them group ids
+        5. Add members to the groups
+        6. In SSSD domain change 'use_fully_qualified_names' to 'true'
+        7. In SSSD domain change 'case_sensitive' to 'false'
+        5. Start SSSD
+    :steps:
+        1. Find users with id(name)
+        2. Find users with id(name@domain) - name is in random lower and upper case format
+        3. Check that users have correct groups
+    :expectedresults:
+        1. Users are not found
+        2. Users are found
+        3. Users are members of correct groups
+    :customerscenario: False
+    """
     u1 = provider.user('user1').add(gid=101)
     u2 = provider.user('user2').add(gid=102)
     u3 = provider.user('user3').add(gid=103)
@@ -334,6 +375,7 @@ def test_id__fq_names_case_insensitive(client: Client, provider: GenericProvider
 
     assert client.tools.id('user1') is None
     assert client.tools.id('user2') is None
+    assert client.tools.id('user3') is None
 
     for name in ['User1@TesT', 'UseR1@TesT', 'UsER1@TesT']:
         result = client.tools.id(name)

@@ -108,7 +108,7 @@ class IdEntry(object):
 
     def memberof(self, groups: int | str | tuple[int, str] | list[int | str | tuple[int, str]]) -> bool:
         """
-        Check if the user is member of give group(s).
+        Check if the user is member of given group(s).
 
         Group specification can be either a single gid or group name. But it can
         be also a tuple of (gid, name) where both gid and name must match or list

@@ -286,22 +286,27 @@ class LinuxToolsUtils(MultihostUtility[MultihostHost]):
         self.__fs: LinuxFileSystem = fs
         self.__rollback: list[str] = []
 
-    def id(self, name: str) -> IdEntry | None:
+    def id(self, name: str, args: list[str] = None) -> IdEntry | None:
         """
         Run ``id`` command.
 
         :param name: User name or id.
         :type name: str | int
+        :param args: Additional arguments to ``id`` command, defaults to empty list.
+        :type args: list[str], optional
         :return: id data, None if not found
         :rtype: IdEntry | None
         """
-        command = self.host.ssh.exec(["id", name], raise_on_error=False)
+        if args is None:
+            args = []
+
+        command = self.host.ssh.exec(["id", *args, name], raise_on_error=False)
         if command.rc != 0:
             return None
 
         return IdEntry.FromOutput(command.stdout)
 
-    def grep(self, pattern: str, paths: str | list[str], args: list[str] = list()) -> bool:
+    def grep(self, pattern: str, paths: str | list[str], args: list[str] = None) -> bool:
         """
         Run ``grep`` command.
 

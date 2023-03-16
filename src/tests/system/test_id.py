@@ -133,6 +133,46 @@ def test_id__getgrgid(client: Client, provider: GenericProvider):
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
+def test_id__getent_passwd(client: Client, provider: GenericProvider):
+    u1 = provider.user('user1').add(uid=10001)
+    u2 = provider.user('user2').add(uid=10002)
+    u3 = provider.user('user3').add(uid=10003)
+
+    provider.group('group1').add(gid=10001).add_member(u1)
+    provider.group('group2').add(gid=10002).add_members([u1, u2])
+    provider.group('group3').add(gid=10003).add_members([u1, u2, u3])
+
+    client.sssd.start()
+
+    assert client.tools.getent.passwd('user1').uid == 10001
+    assert client.tools.getent.passwd(10001).name == 'user1'
+    assert client.tools.getent.passwd('user2').uid == 10002
+    assert client.tools.getent.passwd(10002).name == 'user2'
+    assert client.tools.getent.passwd('user3').uid == 10003
+    assert client.tools.getent.passwd(10003).name == 'user3'
+
+
+@pytest.mark.topology(KnownTopologyGroup.AnyProvider)
+def test_id__getent_group(client: Client, provider: GenericProvider):
+    u1 = provider.user('user1').add()
+    u2 = provider.user('user2').add()
+    u3 = provider.user('user3').add()
+
+    provider.group('group1').add(gid=10001).add_member(u1)
+    provider.group('group2').add(gid=10002).add_members([u1, u2])
+    provider.group('group3').add(gid=10003).add_members([u1, u2, u3])
+
+    client.sssd.start()
+
+    assert client.tools.getent.group('group1').members == ['user1']
+    assert client.tools.getent.group(10001).members == ['user1']
+    assert client.tools.getent.group('group2').members == ['user1', 'user2']
+    assert client.tools.getent.group(10002).members == ['user1', 'user2']
+    assert client.tools.getent.group('group3').members == ['user1', 'user2', 'user3']
+    assert client.tools.getent.group(10003).members == ['user1', 'user2', 'user3']
+
+
+@pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__membership_by_group_name(client: Client, provider: GenericProvider):
     """
     :title: Resolving that user is member of group with id(name) utility and memberof([name])

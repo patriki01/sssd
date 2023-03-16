@@ -438,7 +438,7 @@ def test_id__fq_names_case_insensitive(client: Client, provider: GenericProvider
         5. Add members to the groups
         6. In SSSD domain change 'use_fully_qualified_names' to 'true'
         7. In SSSD domain change 'case_sensitive' to 'false'
-        5. Start SSSD
+        8. Start SSSD
     :steps:
         1. Find users with id(name)
         2. Find users with id(name@domain) - name is in random lower and upper case format

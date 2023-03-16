@@ -286,21 +286,19 @@ class LinuxToolsUtils(MultihostUtility[MultihostHost]):
         self.__fs: LinuxFileSystem = fs
         self.__rollback: list[str] = []
 
-    def id(self, name: str, args: list[str] = None) -> IdEntry | None:
+    def id(self, name: str, *args: str) -> IdEntry | None:
         """
         Run ``id`` command.
 
         :param name: User name or id.
         :type name: str | int
-        :param args: Additional arguments to ``id`` command, defaults to empty list.
-        :type args: list[str], optional
+        :param args: Additional arguments to ``id`` command.
+        :type args: str
         :return: id data, None if not found
         :rtype: IdEntry | None
         """
-        if args is None:
-            args = []
-
-        command = self.host.ssh.exec(["id", *args, name], raise_on_error=False)
+        self.host.ssh.exec(["id", *args, name], raise_on_error=False)
+        command = self.host.ssh.exec(["id", name], raise_on_error=False)
         if command.rc != 0:
             return None
 

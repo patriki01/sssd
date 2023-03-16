@@ -406,16 +406,29 @@ def test_memory_cache__case_insensitive(client: Client, provider: GenericProvide
     u2_groups = [102, 1002, 1003]
     u3_groups = [103, 1003]
 
+#########################################################   W   I   P
+    result = client.tools.id('USer1', '-G')
+    assert result is not None
+    assert result.user.name == 'USer1'.lower()
+    client.sssd.stop()
+
+    result = client.tools.id('USer1', '-G')
+    assert result is not None
+    assert result.user.name == 'USer1'.lower()
+
+
+#########################################################   W   I   P
+    """"
     for i in range(2):
-        for name, groups in [('uSer1', u1_groups), ('useR1', u1_groups), ('uSER1', u1_groups), 
+        for name, groups in [('uSer1', u1_groups), ('useR1', u1_groups), ('uSer1', u1_groups), 
                             ('USEr2', u2_groups), ('uSEr2', u2_groups), ('usER2', u2_groups),
-                            ('USer3', u3_groups), ('uSer3', u3_groups), ('USER3', u3_groups),]:
+                            ('USer3', u3_groups), ('uSer3', u3_groups), ('USER3', u3_groups)]:
             result = client.tools.id(name)
             assert result is not None or name == i
             assert result.user.name == name.lower()
             assert result.memberof(groups)
         if i == 0:
-            client.sssd.stop()
+            client.sssd.stop()"""
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)

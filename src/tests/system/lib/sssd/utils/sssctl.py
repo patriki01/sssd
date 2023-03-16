@@ -1,7 +1,6 @@
 
 from pytest_mh import MultihostHost, MultihostUtility
-from pytest_mh._private.multihost import MultihostRole
-from pytest_mh.ssh import SSHLog, SSHProcess, SSHProcessResult
+from pytest_mh.ssh import SSHProcessResult
 
 
 class SSSCTLUtils(MultihostUtility[MultihostHost]):
@@ -16,16 +15,13 @@ class SSSCTLUtils(MultihostUtility[MultihostHost]):
         """ """"""
         super().__init__(host)
 
-    def cache_expire(self, args: list[str]=None) -> None:
+    def cache_expire(self, *args: str) -> SSHProcessResult:
         """
         Run ``sssctl cache-expire`` command.
 
-        :param args: Additional arguments, defaults to empty list.
-        :type args: list[str], optional
+        :param args: Additional arguments.
+        :type args: str
         """
-        if args is None:
-            args = []
-        self.host.ssh.exec(['sssctl', 'cache-expire', *args])
+        return self.host.ssh.exec(['sssctl', 'cache-expire', *args])
+        # return self.host.ssh.exec(['sss_cache', *args])
 
-
-    

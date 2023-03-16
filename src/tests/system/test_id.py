@@ -344,20 +344,23 @@ def test_id__getpwnam_fully_qualified_names(client: Client, provider: GenericPro
     :title: User can be resolved with id() only by fq name when 'use_fully_qualified_names' is 'true'
     :setup:
         1. Add 'user1' and 'user2' to SSSD
-        2. In SSSD domain change 'use_fully_qualified_names' to 'true'
-        3. Start SSSD
+        2. Set their user ids
+        3. In SSSD domain change 'use_fully_qualified_names' to 'true'
+        4. Start SSSD
     :steps:
         1. Find 'user1' and 'user2' with id(name)
         2. Find 'user1' and 'user2' with id(name@domain)
-        3. Check that results have correct full names
+        3. Check that users have correct full names
+        4. Check that users have correct ids
     :expectedresults:
         1. Users are not found
         2. Users are found
         3. Users have correct full names
+        4. Users have correct ids
     :customerscenario: False
     """
-    u1 = provider.user('user1').add()
-    u2 = provider.user('user2').add()
+    u1 = provider.user('user1').add(uid=10001)
+    u2 = provider.user('user2').add(uid=10002)
 
     client.sssd.domain['use_fully_qualified_names'] = 'true'
     client.sssd.start()
@@ -368,10 +371,12 @@ def test_id__getpwnam_fully_qualified_names(client: Client, provider: GenericPro
     result = client.tools.id('user1@test')
     assert result is not None
     assert result.user.name == 'user1@test'
+    assert result.user.id == 10001
 
     result = client.tools.id('user2@test')
     assert result is not None
     assert result.user.name == 'user2@test'
+    assert result.user.id == 10002
 
 
 #dont have converted mark
@@ -381,16 +386,16 @@ def test_id__case_insensitive(client: Client, provider: GenericProvider):
     :title: Resolving user by id() with case insensitive name when 'case_sensitive' is 'false'
     :setup:
         1. Add 'user1', 'user2' and 'user3' to SSSD
-        2. Set users group ids
+        2. Set group ids to the users
         3. Add 'group1', 'group2' and 'group3' to SSSD
         4. Set them group ids.
         5. Add members to the groups
         6. In SSSD domain change 'case_sensitive' to 'false'
         7. Start SSSD
     :steps:
-        1. Find 'user1', 'user2' and 'user3' with id(name) - name is in random lower and upper case format
+        1. Find users with id(name), where name is in random lower and upper case format
         2. Check that usernames are correctly set
-        3. Check that users have correct groups
+        3. Check that users are members of correct groups
     :expectedresults:
         1. Users are found
         2. Users have correct names
@@ -424,7 +429,7 @@ def test_id__case_insensitive(client: Client, provider: GenericProvider):
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__fq_names_case_insensitive(client: Client, provider: GenericProvider):
     """
-    :title: Resolving user by id() with fq case insensitive name when 'case_sensitive' is 'false' 'and use_fully_qualified_names' is 'true'
+    :title: Resolving user by id() with fq case insensitive name when 'case_sensitive' is 'false' and 'use_fully_qualified_names' is 'true'
     :setup:
         1. Add 'user1', 'user2' and 'user3' to SSSD
         2. Set them group ids

@@ -134,13 +134,33 @@ def test_id__getgrgid(client: Client, provider: GenericProvider):
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__getent_passwd(client: Client, provider: GenericProvider):
+    """
+    :title: Resolving user by getent.passwd() utility
+    :setup:
+        1. Add 'user1', 'user2' and 'user3' to SSSD
+        2. Set their user ids
+        3. Add 'group1', 'group2' and 'group3' to SSSD
+        4. Add users to groups
+        5. Start SSSD
+    :steps:
+        1. Find 'user1', 'user2' and 'user3' with getent(name)
+        2. Find 'user1', 'user2' and 'user3' with getent(uid)
+        3. Check that users have correct names
+        4. Check that users have correct ids
+    :expectedresults:
+        1. Users are found
+        2. Users are found
+        3. Users have correct names
+        4. Users have correct ids
+    :customerscenario: False
+    """
     u1 = provider.user('user1').add(uid=10001)
     u2 = provider.user('user2').add(uid=10002)
     u3 = provider.user('user3').add(uid=10003)
 
-    provider.group('group1').add(gid=10001).add_member(u1)
-    provider.group('group2').add(gid=10002).add_members([u1, u2])
-    provider.group('group3').add(gid=10003).add_members([u1, u2, u3])
+    provider.group('group1').add().add_member(u1)
+    provider.group('group2').add().add_members([u1, u2])
+    provider.group('group3').add().add_members([u1, u2, u3])
 
     client.sssd.start()
 
@@ -154,6 +174,26 @@ def test_id__getent_passwd(client: Client, provider: GenericProvider):
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__getent_group(client: Client, provider: GenericProvider):
+    """
+    :title: Resolving user by getent.group() utility
+    :setup:
+        1. Add 'user1', 'user2' and 'user3' to SSSD
+        2. Add 'group1', 'group2' and 'group3' to SSSD
+        3. Set their gids
+        4. Add users to groups
+        5. Start SSSD
+    :steps:
+        1. Find 'group1', 'group2' and 'group3' with getent(name)
+        2. Find 'group1', 'group2' and 'group3' with getent(gid)
+        3. Check that groups have correct names
+        4. Check that groups have correct users added
+    :expectedresults:
+        1. Groups are found
+        2. Groups are found
+        3. Groups have correct names
+        4. Groups have correct users added
+    :customerscenario: False
+    """
     u1 = provider.user('user1').add()
     u2 = provider.user('user2').add()
     u3 = provider.user('user3').add()
@@ -165,10 +205,13 @@ def test_id__getent_group(client: Client, provider: GenericProvider):
     client.sssd.start()
 
     assert client.tools.getent.group('group1').members == ['user1']
+    assert client.tools.getent.group(10001).name == 'group1'
     assert client.tools.getent.group(10001).members == ['user1']
     assert client.tools.getent.group('group2').members == ['user1', 'user2']
+    assert client.tools.getent.group(10002).name == 'group2'
     assert client.tools.getent.group(10002).members == ['user1', 'user2']
     assert client.tools.getent.group('group3').members == ['user1', 'user2', 'user3']
+    assert client.tools.getent.group(10003).name == 'group3'
     assert client.tools.getent.group(10003).members == ['user1', 'user2', 'user3']
 
 

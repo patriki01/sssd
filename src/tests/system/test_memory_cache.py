@@ -524,9 +524,9 @@ def test_memory_cache__case_insensitive(client: Client, provider: GenericProvide
         7. Users are members of correct groups
     :customerscenario: False
     """
-    u1 = provider.user('user1').add(gid=101)
-    u2 = provider.user('user2').add(gid=102)
-    u3 = provider.user('user3').add(gid=103)
+    u1 = provider.user('user1').add(gid=2001)
+    u2 = provider.user('user2').add(gid=2002)
+    u3 = provider.user('user3').add(gid=2003)
 
     provider.group('group1').add(gid=1001).add_members([u1])
     provider.group('group2').add(gid=1002).add_members([u1, u2])
@@ -534,19 +534,21 @@ def test_memory_cache__case_insensitive(client: Client, provider: GenericProvide
 
     client.sssd.domain['case_sensitive'] = 'false'
     client.sssd.start()
-    input()
-    u1_groups = [101, 1001, 1002, 1003]
-    u2_groups = [102, 1002, 1003]
-    u3_groups = [103, 1003]
+    input('SSSD started')
+    u1_groups = [2001, 1001, 1002, 1003]
+    u2_groups = [2002, 1002, 1003]
+    u3_groups = [2003, 1003]
+    assert client.tools.id('User2')
 
     for name, groups in [('uSer1', u1_groups), ('useR1', u1_groups), ('uSER1', u1_groups)]:
         result = client.tools.id(name)
         assert result is not None
         assert result.user.name == name.lower()
         assert result.memberof(groups)
+    input('before stop')
 
     client.sssd.stop()
-
+    input('sssd Stopped')
     assert client.tools.id('uSer1') is None
     assert client.tools.id('useR1') is None
 

@@ -297,7 +297,7 @@ class LinuxToolsUtils(MultihostUtility[MultihostHost]):
         :return: id data, None if not found
         :rtype: IdEntry | None
         """
-        self.host.ssh.exec(["id", *args, name], raise_on_error=False)
+        # self.host.ssh.exec(["id", *args, name], raise_on_error=False)
         command = self.host.ssh.exec(["id", name], raise_on_error=False)
         if command.rc != 0:
             return None

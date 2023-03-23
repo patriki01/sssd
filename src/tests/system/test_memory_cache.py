@@ -615,41 +615,57 @@ def test_memory_cache__fq_names_case_insensitive(client: Client, provider: Gener
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_memory_cache__invalidatation_of_gids_after_initgroups(client: Client, provider: GenericProvider):
-    u1 = provider.user('user1').add(uid=10001, gid=101)
+    u1 = provider.user('user1').add(uid=10001, gid=1234)
     u2 = provider.user('user2').add(uid=10002, gid=102)
 
-    provider.group('group1').add(gid=1001).add_member(u1)
+    provider.group('group1').add(gid=12345).add_member(u1)
     provider.group('group2').add(gid=1002).add_member(u2)
 
-    client.sssd.start()
+    client.sssd.start()##################################### SETUP
 
     result = client.tools.id('user1')
     assert result is not None
-    assert result.memberof([101, 1001])
+    assert result.memberof([1234, 12345])
 
     result = client.tools.id(10001)
     assert result is not None
-    assert result.memberof([101, 1001])
+    assert result.memberof([1234, 12345])
+
+    result = client.tools.getent.group('group1')
+    assert result is not None
+    assert result.name == 'group1'
 
     result = client.tools.getent.group('group2')
     assert result is not None
     assert result.name == 'group2'
 
-    client.sssd.stop()
+    client.sssd.stop()###################################### STOP
 
-    result = client.tools.id('user1', '-G')
+    result = client.tools.id('user1')
     assert result is not None
-    assert result.memberof([101, 1001])
-    result = client.tools.id(10001, '-G')
+    assert result.memberof([1234, 12345])
+    result = client.tools.id(10001)
     assert result is not None
-    assert result.memberof([101, 1001])
+    assert result.memberof([1234, 12345])
 
     result = client.tools.getent.group('group2')
     assert result is not None
     assert result.name == 'group2'
+    result = client.tools.getent.group(1002)
+    assert result is not None
+    assert result.name == 'group2'
 
+    #assert_initgroups_equal()#####################################????????
+    result = client.tools.id('user1')
+    assert result is not None
+    assert result.memberof([1234, 12345])
+    result = client.tools.id(10001)
+    assert result is not None
+    assert result.memberof([1234, 12345])
+
+    assert client.tools.getent.group(1234) is None # Tohle projde
+    assert client.tools.getent.group(12345) is None # Tohle uz neprojde
     assert client.tools.getent.group('group1') is None
-    assert client.tools.getent.group(1001) is None
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)

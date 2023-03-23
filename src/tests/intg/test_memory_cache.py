@@ -479,14 +479,14 @@ def test_getgrnam_simple_with_mc(ldap_conn, sanity_rfc2307):
     test_getgrnam_simple(ldap_conn, sanity_rfc2307)
 
 
-@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__getgrnam_disabled_passwd')
+@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__disabled_passwd_getgrnam')
 def test_getgrnam_simple_disabled_pwd_mc(ldap_conn, disable_pwd_mc_rfc2307):
     test_getgrnam_simple(ldap_conn, disable_pwd_mc_rfc2307)
     stop_sssd()
     test_getgrnam_simple(ldap_conn, disable_pwd_mc_rfc2307)
 
 
-@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__getgrnam_disabled_intitgroups')
+@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__disabled_intitgroups_getgrnam')
 def test_getgrnam_simple_disabled_intitgr_mc(ldap_conn,
                                              disable_initgr_mc_rfc2307):
     test_getgrnam_simple(ldap_conn, disable_initgr_mc_rfc2307)
@@ -701,6 +701,7 @@ def run_simple_test_with_initgroups():
     assert_initgroups_equal("user1", 2001, [2000, 2001])
 
 
+@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__invalidatation_of_gids_after_initgroups')
 def test_invalidation_of_gids_after_initgroups(ldap_conn, sanity_rfc2307):
 
     # the sssd cache was empty and not all user's group were
@@ -1091,6 +1092,7 @@ def test_mc_zero_timeout(ldap_conn, zero_timeout_rfc2307):
         grp.getgrgid(2001)
 
 
+@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__disabled_cache')
 def test_disabled_mc(ldap_conn, disable_memcache_rfc2307):
     ent.assert_passwd_by_name(
         'user1',
@@ -1124,6 +1126,7 @@ def test_disabled_mc(ldap_conn, disable_memcache_rfc2307):
         (res, errno, gids) = sssd_id.get_user_gids('user1')
 
 
+@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__disabled_passwd_getpwnam')
 def test_disabled_passwd_mc(ldap_conn, disable_pwd_mc_rfc2307):
     ent.assert_passwd_by_name(
         'user1',
@@ -1150,6 +1153,7 @@ def test_disabled_passwd_mc(ldap_conn, disable_pwd_mc_rfc2307):
         (res, errno, gids) = sssd_id.get_user_gids('user1')
 
 
+@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__disabled_group')
 def test_disabled_group_mc(ldap_conn, disable_grp_mc_rfc2307):
     ent.assert_passwd_by_name(
         'user1',
@@ -1185,6 +1189,7 @@ def test_disabled_group_mc(ldap_conn, disable_grp_mc_rfc2307):
     assert_user_gids_equal('user1', [2000, 2001])
 
 
+@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__disabled_intitgroups_getpwnam')
 def test_disabled_initgr_mc(ldap_conn, disable_initgr_mc_rfc2307):
     # Even if initgroups is disabled, passwd should work
     ent.assert_passwd_by_name(

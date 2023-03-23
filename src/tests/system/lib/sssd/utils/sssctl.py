@@ -23,5 +23,3 @@ class SSSCTLUtils(MultihostUtility[MultihostHost]):
         :type args: str
         """
         return self.host.ssh.exec(['sssctl', 'cache-expire', *args])
-        # return self.host.ssh.exec(['sss_cache', *args])
-

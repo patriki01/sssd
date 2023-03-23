@@ -87,7 +87,7 @@ def test_id__getgrnam(client: Client, provider: GenericProvider):
         2. Groups have correct names
         3. Groups have correct ids
     :customerscenario: False
-    """    
+    """
     provider.group('group1').add(gid=1001)
     provider.group('group2').add(gid=1002)
     provider.group('group3').add(gid=1003)
@@ -118,7 +118,7 @@ def test_id__getgrgid(client: Client, provider: GenericProvider):
         2. Groups have correct names
         3. Groups have correct ids
     :customerscenario: False
-    """    
+    """
     provider.group('group1').add(gid=1001)
     provider.group('group2').add(gid=1002)
     provider.group('group3').add(gid=1003)
@@ -285,7 +285,7 @@ def test_id__membership_by_group_id(client: Client, provider: GenericProvider):
 
     result = client.tools.id('user1')
     assert result is not None
-    assert result.memberof([1001,1002])
+    assert result.memberof([1001, 1002])
 
     result = client.tools.id('user2')
     assert result is not None
@@ -364,7 +364,7 @@ def test_id__getpwnam_fully_qualified_names(client: Client, provider: GenericPro
 
     client.sssd.domain['use_fully_qualified_names'] = 'true'
     client.sssd.start()
-        
+
     assert client.tools.id('user1') is None
     assert client.tools.id('user2') is None
 
@@ -379,7 +379,6 @@ def test_id__getpwnam_fully_qualified_names(client: Client, provider: GenericPro
     assert result.user.id == 10002
 
 
-#dont have converted mark
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__case_insensitive(client: Client, provider: GenericProvider):
     """
@@ -417,7 +416,7 @@ def test_id__case_insensitive(client: Client, provider: GenericProvider):
     u2_groups = [102, 1002, 1003]
     u3_groups = [103, 1003]
 
-    for name, groups in [('uSer1', u1_groups), ('useR1', u1_groups), ('uSER1', u1_groups), 
+    for name, groups in [('uSer1', u1_groups), ('useR1', u1_groups), ('uSER1', u1_groups),
                          ('USEr2', u2_groups), ('uSEr2', u2_groups), ('usER2', u2_groups),
                          ('USer3', u3_groups), ('uSer3', u3_groups), ('USER3', u3_groups),]:
         result = client.tools.id(name)
@@ -479,4 +478,3 @@ def test_id__fq_names_case_insensitive(client: Client, provider: GenericProvider
         result = client.tools.id(name)
         assert result is not None
         assert result.memberof([103, 1003])
-    

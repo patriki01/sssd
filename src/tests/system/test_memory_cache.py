@@ -1,4 +1,9 @@
+import struct
 import pytest
+import random
+import string
+
+# from .. import pysss_murmur
 
 from lib.sssd.roles.client import Client
 from lib.sssd.roles.generic import GenericProvider
@@ -122,21 +127,33 @@ def test_memory_cache__disabled_passwd_getgrnam(client: Client, provider: Generi
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_memory_cache__disabled_passwd_getpwnam(client: Client, provider: GenericProvider):
-    u1 = provider.user('user1').add(uid=10001)
-    u2 = provider.user('user2').add(uid=10002)
-    u3 = provider.user('user3').add(uid=10003)
-
-    provider.group('group1').add(gid=1111).add_member(u1)
-    provider.group('group2').add(gid=2222).add_members([u1, u2, u3])
+    """
+    :title: User is not able to id(name) after 'memcache_size_passwd' is set to '0' and SSSD is stopped
+    :setup:
+        1. Add users to SSSD
+        2. Set them user ids
+        3. In SSSD nss change 'memcache_size_passwd' to '0'
+        4. Start SSSD
+    :steps:
+        1. Find 'user1', 'user2' and 'user3' with id(name)
+        2. Check that users have correct names
+        3. Stop SSSD
+        4. Find 'user1', 'user2' and 'user3' with id(name)
+        5. Find 'user1', 'user2' and 'user3' with id(uid)
+    :expectedresults:
+        1. Users are found
+        2. Users have correct names
+        3. SSSD is stopped
+        4. Users are not found
+        5. Users are not found
+    :customerscenario: False
+    """
+    provider.user('user1').add(uid=10001)
+    provider.user('user2').add(uid=10002)
+    provider.user('user3').add(uid=10003)
 
     client.sssd.nss['memcache_size_passwd'] = '0'
     client.sssd.start()
-
-    for group, members in [(1111, ['user1']), (2222, ['user1', 'user2', 'user3'])]:
-        result = client.tools.getent.group(group)
-        assert result is not None
-        assert result.gid == group
-        assert result.members == members
 
     for user in ['user1', 'user2', 'user3']:
         result = client.tools.id(user)
@@ -145,16 +162,7 @@ def test_memory_cache__disabled_passwd_getpwnam(client: Client, provider: Generi
 
     client.sssd.stop()
 
-    for group, members in [(1111, ['user1']), (2222, ['user1', 'user2', 'user3'])]:
-        result = client.tools.getent.group(group)
-        assert result is not None
-        assert result.gid == group
-        assert result.members == members
-
-    for user in ['user1', 'user2', 'user3']:
-        assert client.tools.id(user) is None
-
-    for user in [10001, 10002, 10003]:
+    for user in ['user1', 'user2', 'user3', 10001, 10002, 10003]:
         assert client.tools.id(user) is None
 
 
@@ -198,9 +206,40 @@ def test_memory_cache__disabled_intitgroups_getgrnam(client: Client, provider: G
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_memory_cache__disabled_intitgroups_getpwnam(client: Client, provider: GenericProvider):
-    u1 = provider.user('user1').add(uid=10001)
-    u2 = provider.user('user2').add(uid=10002)
-    u2 = provider.user('user3').add(uid=10003)
+    """
+    :title: User is able to id(name) and id(uid) after 'memcache_size_initgroups' is set to '0' and SSSD is stopped
+    :setup:
+        1. Add users to SSSD
+        2. Set them user ids
+        3. In SSSD nss change 'memcache_size_initgroups' to '0'
+        4. Start SSSD
+    :steps:
+        1. Find 'user1', 'user2' and 'user3' with id(name)
+        2. Check that users have correct names
+        3. Check that users have correct uids
+        4. Stop SSSD
+        5. Find 'user1', 'user2' and 'user3' with id(name)
+        6. Check that users have correct names
+        7. Check that users have correct uids
+        8. Find 'user1', 'user2' and 'user3' with id(uid)
+        9. Check that users have correct names
+        10. Check that users have correct uids
+    :expectedresults:
+        1. Users are found
+        2. Users have correct names
+        3. Users have correct uids
+        4. SSSD is stopped
+        5. Users are found
+        6. Users have correct names
+        7. Users have correct uids
+        8. Users are found
+        9. Users have correct names
+        10. Users have correct uids
+    :customerscenario: False
+    """
+    provider.user('user1').add(uid=10001)
+    provider.user('user2').add(uid=10002)
+    provider.user('user3').add(uid=10003)
 
     client.sssd.nss['memcache_size_initgroups'] = '0'
     client.sssd.start()
@@ -219,9 +258,48 @@ def test_memory_cache__disabled_intitgroups_getpwnam(client: Client, provider: G
         assert result.user.name == name
         assert result.user.id == id
 
+        result = client.tools.id(id)
+        assert result is not None
+        assert result.user.name == name
+        assert result.user.id == id
+
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_memory_cache__disabled_group(client: Client, provider: GenericProvider):
+    """
+    :title: User is able to id(name) and id(uid) after 'memcache_size_group' is set to '0' and SSSD is stopped,
+            but groups are not able to getent.group()
+    :setup:
+        1. Add users to SSSD
+        2. Set them user ids
+        3. Add groups to SSSD
+        4. Set them group ids
+        5. In SSSD nss change 'memcache_size_group' to '0'
+        6. Start SSSD
+    :steps:
+        1. Find 'user1', 'user2' and 'user3' with id(name)
+        2. Check that users have correct names
+        3. Find 'group1' and 'group2' by getent.group(gid)
+        4. Check that groups have correct gids
+        5. Check that groups have correct members
+        6. Stop SSSD
+        7. Find 'user1', 'user2' and 'user3' with id(name)
+        8. Check that users have correct names
+        9. Find 'group1' and 'group2' by getent.group(name)
+        10. Find 'group1' and 'group2' by getent.group(gid)
+    :expectedresults:
+        1. Users are found
+        2. Users have correct names
+        3. Groups are found
+        4. Groups have correct gids
+        5. Groups have correct members
+        6. SSSD is stopped
+        7. Users are found
+        8. Users have correct names
+        9. Groups are not found
+        10. Groups are not found
+    :customerscenario: False
+    """
     u1 = provider.user('user1').add(uid=10001)
     u2 = provider.user('user2').add(uid=10002)
     u3 = provider.user('user3').add(uid=10003)
@@ -250,15 +328,47 @@ def test_memory_cache__disabled_group(client: Client, provider: GenericProvider)
         assert result is not None
         assert result.user.name == user
 
-    for group in ['group1', 'group2']:
-        assert client.tools.id(group) is None
-
-    for group in [1111, 2222]:
+    for group in ['group1', 'group2', 1111, 2222]:
         assert client.tools.id(group) is None
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_memory_cache__disabled_cache(client: Client, provider: GenericProvider):
+    """
+    :title: User and group are not able to id() or getent.group() after SSSD is stopped and cache disabled
+    :setup:
+        1. Add users to SSSD
+        2. Set them user ids
+        3. Add groups to SSSD
+        4. Set them group ids
+        5. In SSSD nss change 'memcache_size_passwd' to '0'
+        6. In SSSD nss change 'memcache_size_group' to '0'
+        7. In SSSD nss change 'memcache_size_initgroups' to '0'
+        8. Start SSSD
+    :steps:
+        1. Find 'user1', 'user2' and 'user3' with id(name)
+        2. Check that users have correct names
+        3. Find 'group1' and 'group2' by getent.group(name)
+        4. Check that groups have correct names
+        5. Check that groups have correct members
+        6. Stop SSSD
+        7. Find 'user1', 'user2' and 'user3' with id(name)
+        8. Find 'user1', 'user2' and 'user3' with id(uid)
+        9. Find 'group1' and 'group2' by getent.group(name)
+        10. Find 'group1' and 'group2' by getent.group(gid)
+    :expectedresults:
+        1. Users are found
+        2. Users have correct names
+        3. Groups are found
+        4. Groups have correct names
+        5. Groups have correct members
+        6. SSSD is stopped
+        7. Users are not found
+        8. Users are not found
+        9. Groups are not found
+        10. Groups are not found
+    :customerscenario: False
+    """
     u1 = provider.user('user1').add(uid=10001)
     u2 = provider.user('user2').add(uid=10002)
     u3 = provider.user('user3').add(uid=10003)
@@ -672,6 +782,19 @@ def test_memory_cache__invalidatation_of_gids_after_initgroups(client: Client, p
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_memory_cache__initgroups_without_change_in_membership(client: Client, provider: GenericProvider):
+    """
+    :title: User by id(), case insensitive fq name when 'case_sensitive' is 'false', 
+            'use_fully_qualified_names' is 'true' and SSSD is stopped
+    :setup:
+        1. Add 'user1', 'user2' and 'user3' to SSSD
+    :steps:
+        1. Find users with id(name@domain), where name is in random lower and upper case format
+        2. Check that users are members of correct groups
+        3. Stop SSSD
+    :expectedresults:
+        1. Users are found
+    :customerscenario: False
+    """
     u1 = provider.user('user1').add(uid=10001, gid=101)
     u2 = provider.user('user2').add(uid=10002, gid=202)
 
@@ -960,3 +1083,142 @@ def test_memory_cache__invalidate_everything_after_stop(client: Client, provider
     assert client.tools.getent.group(110011) is None
     assert client.tools.getent.group('group2') is None
     assert client.tools.getent.group(202020) is None
+
+
+@pytest.mark.topology(KnownTopologyGroup.AnyProvider)
+def test_memory_cache__memcache_timeout_zero(client: Client, provider: GenericProvider):
+    u1 = provider.user('user1').add(uid=123456)
+
+    provider.group('group1').add(gid=10001).add_member(u1)
+
+    client.sssd.nss['memcache_timeout'] = '0'
+    client.sssd.start()
+
+    r = client.sssctl.cache_ls()
+    assert r.stdout == ''
+
+    result = client.tools.id('user1')
+    assert result is not None
+    assert result.user.name == 'user1'
+    assert result.user.id == 123456
+
+    result = client.tools.getent.group('group1')
+    assert result is not None
+    assert result.name == 'group1'
+    assert result.gid == 10001
+
+    client.sssd.stop()
+
+    assert client.tools.id('user1') is None
+    assert client.tools.id(123456) is None
+    assert client.tools.getent.group('group1') is None
+    assert client.tools.getent.group(10001) is None
+
+
+@pytest.mark.topology(KnownTopologyGroup.AnyProvider)
+def test_memory_cache__removed_cache_without_invalidation(client: Client, provider: GenericProvider):
+    u1 = provider.user('user1').add(uid=123456, gid=110011, password='')
+
+    provider.group('group1').add(gid=10001).add_members([u1])
+
+    client.sssd.start()
+
+    result = client.tools.id('user1')
+    assert result is not None
+    assert result.user.name == 'user1'
+    assert result.user.id == 123456
+
+    result = client.tools.getent.group('group1')
+    assert result is not None
+    assert result.name == 'group1'
+    assert result.gid == 10001
+    assert result.members == ['user1']
+
+    client.sssd.stop()
+
+    result = client.tools.id('user1')
+    assert result is not None
+    assert result.user.name == 'user1'
+    assert result.user.id == 123456
+
+    result = client.tools.getent.group('group1')
+    assert result is not None
+    assert result.name == 'group1'
+    assert result.gid == 10001
+    assert result.members == ['user1']
+
+    client.sssctl.remove_cache_files()
+
+    assert client.tools.id('user1') is None
+    assert client.tools.id(123456) is None
+    assert client.tools.getent.group('group1') is None
+    assert client.tools.getent.group(10001) is None
+
+
+@pytest.mark.topology(KnownTopologyGroup.AnyProvider)
+def test_memory_cache__colliding_hashes(client: Client, provider: GenericProvider):
+    provider.user('user1').add(uid=123456)
+
+    client.sssd.start()
+
+    result = client.tools.id('user1')
+    assert result is not None
+    assert result.user.name == 'user1'
+    assert result.user.id == 123456
+
+    mem_cache = MemoryCache(client.sssctl.cache_path + '/passwd')
+    colliding_hash = mem_cache.sss_nss_mc_hash('user1')
+
+    while True:
+        # string for colliding hash need to be longer then data for user1
+        # stored in memory cache (almost equivalent to:
+        #   `getent passwd user1 | wc -c` ==> 45
+        colliding_user = get_random_string(80)
+        val = mem_cache.sss_nss_mc_hash(colliding_user)
+        if val == colliding_hash:
+            break
+
+    # Add the user with colliding hash
+    provider.user(colliding_user).add(uid=5001, gid=5001)
+
+    result = client.tools.id(colliding_user)
+    assert result is not None
+    assert result.user.name == colliding_user
+    assert result.user.id == 5001
+
+    client.sssd.stop()
+
+    result = client.tools.id('user1')
+    assert result is not None
+    assert result.user.name == 'user1'
+    assert result.user.id == 123456
+
+    result = client.tools.id(colliding_user)
+    assert result is not None
+    assert result.user.name == colliding_user
+    assert result.user.id == 5001
+
+
+def get_random_string(length):
+    return ''.join([random.choice(string.ascii_letters + string.digits)
+                    for n in range(length)])
+
+
+class MemoryCache(object):
+    SIZEOF_UINT32_T = 4
+
+    def __init__(self, path):
+        with open(path, "rb") as fin:
+            fin.seek(4 * self.SIZEOF_UINT32_T)
+            self.seed = struct.unpack('i', fin.read(4))[0]
+            self.data_size = struct.unpack('i', fin.read(4))[0]
+            self.ft_size = struct.unpack('i', fin.read(4))[0]
+            hash_len = struct.unpack('i', fin.read(4))[0]
+            self.hash_size = hash_len / self.SIZEOF_UINT32_T
+
+    def sss_nss_mc_hash(self, key):
+        input_key = key + '\0'
+        input_len = len(key) + 1
+
+        murmur_hash = pysss_murmur.murmurhash3(input_key, input_len, self.seed)
+        return murmur_hash % self.hash_size

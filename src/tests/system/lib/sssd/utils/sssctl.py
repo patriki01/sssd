@@ -14,6 +14,7 @@ class SSSCTLUtils(MultihostUtility[MultihostHost]):
         :type host: MultihostHost
         """ """"""
         super().__init__(host)
+        self.cache_path = '/var/lib/sss/mc'
 
     def cache_expire(self, *args: str) -> SSHProcessResult:
         """
@@ -23,3 +24,19 @@ class SSSCTLUtils(MultihostUtility[MultihostHost]):
         :type args: str
         """
         return self.host.ssh.exec(['sssctl', 'cache-expire', *args])
+
+    def cache_ls(self) -> SSHProcessResult:
+        """
+        Run ``ls 'cache_path'`` command.
+        Result output of ``ls`` is stored in result.stdout
+        """
+        return self.host.ssh.exec(['ls', self.cache_path])
+    
+    def remove_cache_files(self) -> SSHProcessResult:
+        """
+        Remove all cache files without invalidation.
+        """
+        r = self.cache_ls()
+        for file in r.stdout.split():
+            result = self.host.ssh.exec(['rm', f'{self.cache_path}/{file}'])
+        return result

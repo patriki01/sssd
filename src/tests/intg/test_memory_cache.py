@@ -972,6 +972,7 @@ class MemoryCache(object):
         return murmur_hash % self.hash_size
 
 
+@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__colliding_hashes')
 def test_colliding_hashes(ldap_conn, sanity_rfc2307):
     """
     Regression test for ticket:
@@ -1023,6 +1024,7 @@ def test_colliding_hashes(ldap_conn, sanity_rfc2307):
              gecos='5001', shell='/bin/bash'))
 
 
+@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__removed_cache_without_invalidation')
 def test_removed_mc(ldap_conn, sanity_rfc2307):
     """
     Regression test for ticket:
@@ -1059,6 +1061,7 @@ def test_removed_mc(ldap_conn, sanity_rfc2307):
         grp.getgrgid(2001)
 
 
+@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__memcache_timeout_zero')
 def test_mc_zero_timeout(ldap_conn, zero_timeout_rfc2307):
     """
     Test that the memory cache is not created at all with memcache_timeout=0

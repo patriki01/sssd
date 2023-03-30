@@ -1,20 +1,17 @@
 import pytest
 
-from lib.sssd.roles.ad import AD
 from lib.sssd.roles.client import Client
-from lib.sssd.roles.generic import GenericADProvider, GenericProvider
-from lib.sssd.roles.ldap import LDAP
-from lib.sssd.roles.samba import Samba
-from lib.sssd.topology import KnownTopology, KnownTopologyGroup
+from lib.sssd.roles.generic import GenericProvider
+from lib.sssd.topology import KnownTopologyGroup
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__getpwnam(client: Client, provider: GenericProvider):
     """
-    :title: Resolving user with getpwnam by id(name) utility
+    :title: Resolving user with getpwnam by id(name)
     :setup:
         1. Add 'user1', 'user2' and 'user3' to SSSD
-        2. Set their user ids
+        2. Set users uids
         3. Start SSSD
     :steps:
         1. Find 'user1', 'user2' and 'user3' with id(name)
@@ -42,15 +39,15 @@ def test_id__getpwnam(client: Client, provider: GenericProvider):
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__getpwuid(client: Client, provider: GenericProvider):
     """
-    :title: Resolving user with getpwuid by id(uid) utility
+    :title: Resolving user with getpwuid by id(uid)
     :setup:
         1. Add 'user1', 'user2' and 'user3' to SSSD
-        2. Set their user ids
+        2. Set users uids
         3. Start SSSD
     :steps:
-        1. Find 'user1', 'user2' and 'user3' with id() by user id
-        2. Check that results have correct names
-        3. Check that results have correct ids
+        1. Find 'user1', 'user2' and 'user3' with id(uid)
+        2. Check that users have correct names
+        3. Check that users have correct ids
     :expectedresults:
         1. Users are found
         2. Users have correct names
@@ -73,19 +70,19 @@ def test_id__getpwuid(client: Client, provider: GenericProvider):
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__getgrnam(client: Client, provider: GenericProvider):
     """
-    :title: Resolving group with getgrnam by getent.group(name) utility
+    :title: Resolving group with getgrnam by getent.group(name)
     :setup:
         1. Add 'group1', 'group2' and 'group3' to SSSD
-        2. Set their group ids
+        2. Set groups gids
         3. Start SSSD
     :steps:
         1. Find 'group1', 'group2' and 'group3' with getent.group(name)
         2. Check that groups have correct names
-        3. Check that groups have correct group ids
+        3. Check that groups have correct gids
     :expectedresults:
         1. Groups are found
         2. Groups have correct names
-        3. Groups have correct ids
+        3. Groups have correct gids
     :customerscenario: False
     """
     provider.group('group1').add(gid=1001)
@@ -104,19 +101,19 @@ def test_id__getgrnam(client: Client, provider: GenericProvider):
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__getgrgid(client: Client, provider: GenericProvider):
     """
-    :title: Resolving group with getgrgid by getent.group(gid) utility
+    :title: Resolving group with getgrgid by getent.group(gid)
     :setup:
         1. Add 'group1', 'group2' and 'group3' to SSSD
-        2. Set their group ids
+        2. Set groups gids
         3. Start SSSD
     :steps:
-        1. Find 'group1', 'group2' and 'group3' with getent.group() by group id
-        2. Check that results have correct names
-        3. Check that results have correct group ids
+        1. Find 'group1', 'group2' and 'group3' with getent.group(gid)
+        2. Check that users have correct names
+        3. Check that users have correct gids
     :expectedresults:
         1. Groups are found
         2. Groups have correct names
-        3. Groups have correct ids
+        3. Groups have correct gids
     :customerscenario: False
     """
     provider.group('group1').add(gid=1001)
@@ -135,16 +132,16 @@ def test_id__getgrgid(client: Client, provider: GenericProvider):
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__getent_passwd(client: Client, provider: GenericProvider):
     """
-    :title: Resolving user by getent.passwd() utility
+    :title: Resolving user by getent.passwd()
     :setup:
         1. Add 'user1', 'user2' and 'user3' to SSSD
-        2. Set their user ids
+        2. Set users uids
         3. Add 'group1', 'group2' and 'group3' to SSSD
         4. Add users to groups
         5. Start SSSD
     :steps:
-        1. Find 'user1', 'user2' and 'user3' with getent(name)
-        2. Find 'user1', 'user2' and 'user3' with getent(uid)
+        1. Find 'user1', 'user2' and 'user3' with getent.passwd(name)
+        2. Find 'user1', 'user2' and 'user3' with getent.passwd(uid)
         3. Check that users have correct names
         4. Check that users have correct ids
     :expectedresults:
@@ -175,16 +172,16 @@ def test_id__getent_passwd(client: Client, provider: GenericProvider):
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__getent_group(client: Client, provider: GenericProvider):
     """
-    :title: Resolving user by getent.group() utility
+    :title: Resolving user by getent.group()
     :setup:
         1. Add 'user1', 'user2' and 'user3' to SSSD
         2. Add 'group1', 'group2' and 'group3' to SSSD
-        3. Set their gids
+        3. Set groups gids
         4. Add users to groups
         5. Start SSSD
     :steps:
-        1. Find 'group1', 'group2' and 'group3' with getent(name)
-        2. Find 'group1', 'group2' and 'group3' with getent(gid)
+        1. Find 'group1', 'group2' and 'group3' with getent.group(name)
+        2. Find 'group1', 'group2' and 'group3' with getent.group(gid)
         3. Check that groups have correct names
         4. Check that groups have correct users added
     :expectedresults:
@@ -218,13 +215,12 @@ def test_id__getent_group(client: Client, provider: GenericProvider):
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__membership_by_group_name(client: Client, provider: GenericProvider):
     """
-    :title: Resolving that user is member of group with id(name) utility and memberof([name])
+    :title: Resolving that user is member of group with id(name) and memberof([name])
     :setup:
         1. Add 'user1', 'user2' and 'user3' to SSSD
         2. Add 'group1' and 'group2' to SSSD
-        3. Add 'user1' to 'group1'
-        4. Add 'user1', 'user2' and 'user3' to 'group2'
-        3. Start SSSD
+        3. Add users to groups
+        4. Start SSSD
     :steps:
         1. Find 'user1', 'user2' and 'user3' with id(name)
         2. Check that users are members of correct groups using memberof([name])
@@ -258,13 +254,12 @@ def test_id__membership_by_group_name(client: Client, provider: GenericProvider)
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__membership_by_group_id(client: Client, provider: GenericProvider):
     """
-    :title: Resolving that user is member of group with id(name) utility and memberof([gid])
+    :title: Resolving that user is member of group with id(name) and memberof([gid])
     :setup:
         1. Add 'user1', 'user2' and 'user3' to SSSD
         2. Add 'group1', 'group2' and 'group3' to SSSD
-        3. Add 'user1' to 'group1'
-        4. Add 'user1', 'user2' and 'user3' to 'group2'
-        5. Start SSSD
+        3. Add users to groups
+        4. Start SSSD
     :steps:
         1. Find 'user1', 'user2' and 'user3' with id(name)
         2. Check that users are members of correct groups using memberof([gid])
@@ -304,7 +299,7 @@ def test_id__user_gids(client: Client, provider: GenericProvider):
         1. Add 'user1', 'user2' and 'user3' to SSSD
         2. Set users uids and gids
         3. Add 'group1' and 'group2' to SSSD
-        4. Set their gids
+        4. Set groups gids
         5. Add 'user1' to 'group1'
         6. Add 'user1', 'user2' and 'user3' to 'group2'
         7. Start SSSD
@@ -344,7 +339,7 @@ def test_id__getpwnam_fully_qualified_names(client: Client, provider: GenericPro
     :title: User can be resolved with id() only by fq name when 'use_fully_qualified_names' is 'true'
     :setup:
         1. Add 'user1' and 'user2' to SSSD
-        2. Set their user ids
+        2. Set users uids
         3. In SSSD domain change 'use_fully_qualified_names' to 'true'
         4. Start SSSD
     :steps:
@@ -385,9 +380,9 @@ def test_id__case_insensitive(client: Client, provider: GenericProvider):
     :title: Resolving user by id() with case insensitive name when 'case_sensitive' is 'false'
     :setup:
         1. Add 'user1', 'user2' and 'user3' to SSSD
-        2. Set group ids to the users
+        2. Set users gids
         3. Add 'group1', 'group2' and 'group3' to SSSD
-        4. Set them group ids.
+        4. Set group gids.
         5. Add members to the groups
         6. In SSSD domain change 'case_sensitive' to 'false'
         7. Start SSSD
@@ -431,9 +426,9 @@ def test_id__fq_names_case_insensitive(client: Client, provider: GenericProvider
     :title: Resolving user by id() with fq case insensitive name when 'case_sensitive' is 'false' and 'use_fully_qualified_names' is 'true'
     :setup:
         1. Add 'user1', 'user2' and 'user3' to SSSD
-        2. Set them group ids
+        2. Set users gids
         3. Add 'group1', 'group2' and 'group3' to SSSD
-        4. Set them group ids
+        4. Set groups gids
         5. Add members to the groups
         6. In SSSD domain change 'use_fully_qualified_names' to 'true'
         7. In SSSD domain change 'case_sensitive' to 'false'

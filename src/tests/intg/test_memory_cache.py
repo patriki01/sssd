@@ -972,7 +972,6 @@ class MemoryCache(object):
         return murmur_hash % self.hash_size
 
 
-@pytest.mark.converted('test_memory_cache.py', 'test_memory_cache__colliding_hashes')
 def test_colliding_hashes(ldap_conn, sanity_rfc2307):
     """
     Regression test for ticket:

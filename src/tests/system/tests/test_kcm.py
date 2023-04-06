@@ -364,3 +364,16 @@ def test_kcm__tgt_renewal(client: Client, kdc: KDC):
             (renew_start, _) = krb.list_tgt_times(kdc.realm)
 
             assert init_start < renew_start
+
+
+@pytest.mark.topology(KnownTopology.Client)
+def test_kcm__simple_kinit(client: Client, kdc: KDC):
+    kdc.principal("tuser").add(password="Secret123")
+    client.local.user("tuser").add(password="Secret123")
+    client.sssd.common.kcm(kdc)
+    client.sssd.start()
+
+    with client.ssh("tuser", "Secret123") as ssh:
+        with client.auth.kerberos(ssh) as krb:
+            assert krb.kinit("tuser", password="Secret123").rc == 0
+

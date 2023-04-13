@@ -57,12 +57,27 @@ def test_ssh__offline_login(client: Client, provider: GenericProvider):
 
 @pytest.mark.topology(KnownTopology.Client)
 def test_ssh__simple_kinit(client: Client, kdc: KDC):
-    kdc.principal("tuser").add(password="Secret123")
-    client.local.user("tuser").add(password="Secret123")
+    """
+    :title: Kinit
+    :setup:
+        1. Add 'user1' to kdc and set its password
+        2. Add 'user1' to local and set its password
+        3. Configure Kerberos to allow KCM tests
+    :steps:
+        1. Authenticate to ssh
+        2. Connect to kerberos
+        3. Authenticate to kerberos to get TGT
+    :expectedresults:
+        1. User is authenticated
+        2. User is connected
+        3. User is authenticated
+    :customerscenario: False
+    """
+    kdc.principal('user1').add(password='123456')
+    client.local.user('user1').add(password='123456')
     client.sssd.common.kcm(kdc)
-    client.sssd.start()
 
-    with client.ssh("tuser", "Secret123") as ssh:
+    with client.ssh('user1', '123456') as ssh:
         with client.auth.kerberos(ssh) as krb:
-            assert krb.kinit("tuser", password="Secret123").rc == 0
+            assert krb.kinit('user1', password='123456').rc == 0
 

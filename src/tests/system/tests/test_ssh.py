@@ -1,8 +1,9 @@
 import pytest
-import time
+
+from lib.sssd.roles.kdc import KDC
 from lib.sssd.roles.client import Client
 from lib.sssd.roles.generic import GenericProvider
-from lib.sssd.topology import KnownTopologyGroup
+from lib.sssd.topology import KnownTopologyGroup, KnownTopology
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
@@ -52,3 +53,16 @@ def test_ssh__offline_login(client: Client, provider: GenericProvider):
 
     assert correct
     assert not incorrect
+
+
+@pytest.mark.topology(KnownTopology.Client)
+def test_ssh__simple_kinit(client: Client, kdc: KDC):
+    kdc.principal("tuser").add(password="Secret123")
+    client.local.user("tuser").add(password="Secret123")
+    client.sssd.common.kcm(kdc)
+    client.sssd.start()
+
+    with client.ssh("tuser", "Secret123") as ssh:
+        with client.auth.kerberos(ssh) as krb:
+            assert krb.kinit("tuser", password="Secret123").rc == 0
+

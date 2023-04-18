@@ -25,6 +25,7 @@ class TestSSSDConfig(object):
         check_str = '%s: %s' % (key, value)
         assert check_str in cmd.stdout_text
 
+    @pytest.mark.converted('test_config.py', 'test_config__change_particular_section')
     def test_sssd_genconf_sssd_running(self, multihost):
         """
         :title: config: sssd --genconf is able to re-generate
@@ -41,6 +42,7 @@ class TestSSSDConfig(object):
 
         set_param(multihost, 'pam', 'debug_level', '9')
 
+    @pytest.mark.converted('test_config.py', 'test_config__change_particular_section')
     def test_sssd_genconf_section_only(self, multihost):
         """
         :title: config: sssd --genconf-section only
@@ -65,6 +67,7 @@ class TestSSSDConfig(object):
         set_param(multihost, 'nss', 'debug_level', '9')
         set_param(multihost, 'pam', 'debug_level', '9')
 
+    @pytest.mark.converted('test_config.py', 'test_config__add_remove_section')
     def test_sssd_genconf_add_remove_section(self, multihost):
         """
         :title: config: sssd --genconf-section can not only modify
@@ -96,6 +99,7 @@ class TestSSSDConfig(object):
         self._assert_config_value(multihost, 'pam', 'debug_level', '9')
         self._assert_config_value(multihost, 'nss', 'debug_level', '9')
 
+    @pytest.mark.converted('test_config.py', 'test_config__genconf_no_such_section')
     def test_sssd_genconf_no_such_section(self, multihost):
         """
         :title: config: Referencing a non-existant section must not fail

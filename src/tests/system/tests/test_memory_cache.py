@@ -1,8 +1,9 @@
-import pytest
+from __future__ import annotations
 
-from lib.sssd.roles.client import Client
-from lib.sssd.roles.generic import GenericProvider
-from lib.sssd.topology import KnownTopologyGroup
+import pytest
+from sssd_test_framework.roles.client import Client
+from sssd_test_framework.roles.generic import GenericProvider
+from sssd_test_framework.topology import KnownTopologyGroup
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
@@ -26,14 +27,14 @@ def test_memory_cache__getpwnam(client: Client, provider: GenericProvider):
         5. Users have correct names
     :customerscenario: False
     """
-    provider.user('user1').add()
-    provider.user('user2').add()
-    provider.user('user3').add()
+    provider.user("user1").add()
+    provider.user("user2").add()
+    provider.user("user3").add()
 
     client.sssd.start()
 
     for i in range(2):
-        for user in ['user1', 'user2', 'user3']:
+        for user in ["user1", "user2", "user3"]:
             result = client.tools.id(user)
             assert result is not None
             assert result.user.name == user
@@ -62,14 +63,14 @@ def test_memory_cache__getgrnam(client: Client, provider: GenericProvider):
         5. Groups have correct names
     :customerscenario: False
     """
-    provider.group('group1').add()
-    provider.group('group2').add()
-    provider.group('group3').add()
+    provider.group("group1").add()
+    provider.group("group2").add()
+    provider.group("group3").add()
 
     client.sssd.start()
 
     for i in range(2):
-        for group in ['group1', 'group2', 'group3']:
+        for group in ["group1", "group2", "group3"]:
             result = client.tools.getent.group(group)
             assert result is not None
             assert result.name == group
@@ -99,15 +100,15 @@ def test_memory_cache__disabled_passwd_getgrnam(client: Client, provider: Generi
         5. Groups have correct names
     :customerscenario: False
     """
-    provider.group('group1').add()
-    provider.group('group2').add()
-    provider.group('group3').add()
+    provider.group("group1").add()
+    provider.group("group2").add()
+    provider.group("group3").add()
 
-    client.sssd.nss['memcache_size_passwd'] = '0'
+    client.sssd.nss["memcache_size_passwd"] = "0"
     client.sssd.start()
 
     for i in range(2):
-        for group in ['group1', 'group2', 'group3']:
+        for group in ["group1", "group2", "group3"]:
             result = client.tools.getent.group(group)
             assert result is not None
             assert result.name == group
@@ -138,21 +139,21 @@ def test_memory_cache__disabled_passwd_getpwnam(client: Client, provider: Generi
         5. Users are not found
     :customerscenario: False
     """
-    provider.user('user1').add(uid=10001)
-    provider.user('user2').add(uid=10002)
-    provider.user('user3').add(uid=10003)
+    provider.user("user1").add(uid=10001)
+    provider.user("user2").add(uid=10002)
+    provider.user("user3").add(uid=10003)
 
-    client.sssd.nss['memcache_size_passwd'] = '0'
+    client.sssd.nss["memcache_size_passwd"] = "0"
     client.sssd.start()
 
-    for user in ['user1', 'user2', 'user3']:
+    for user in ["user1", "user2", "user3"]:
         result = client.tools.id(user)
         assert result is not None
         assert result.user.name == user
 
     client.sssd.stop()
 
-    for user in ['user1', 'user2', 'user3', 10001, 10002, 10003]:
+    for user in ["user1", "user2", "user3", "10001", "10002", "10003"]:
         assert client.tools.id(user) is None
 
 
@@ -178,15 +179,15 @@ def test_memory_cache__disabled_intitgroups_getgrnam(client: Client, provider: G
         5. Groups have correct names
     :customerscenario: False
     """
-    provider.group('group1').add()
-    provider.group('group2').add()
-    provider.group('group3').add()
+    provider.group("group1").add()
+    provider.group("group2").add()
+    provider.group("group3").add()
 
-    client.sssd.nss['memcache_size_initgroups'] = '0'
+    client.sssd.nss["memcache_size_initgroups"] = "0"
     client.sssd.start()
 
     for i in range(2):
-        for group in ['group1', 'group2', 'group3']:
+        for group in ["group1", "group2", "group3"]:
             result = client.tools.getent.group(group)
             assert result is not None
             assert result.name == group
@@ -221,31 +222,31 @@ def test_memory_cache__disabled_intitgroups_getpwnam(client: Client, provider: G
         7. Users have correct names and uids
     :customerscenario: False
     """
-    provider.user('user1').add(uid=10001)
-    provider.user('user2').add(uid=10002)
-    provider.user('user3').add(uid=10003)
+    provider.user("user1").add(uid=10001)
+    provider.user("user2").add(uid=10002)
+    provider.user("user3").add(uid=10003)
 
-    client.sssd.nss['memcache_size_initgroups'] = '0'
+    client.sssd.nss["memcache_size_initgroups"] = "0"
     client.sssd.start()
 
-    for name, id in [('user1', 10001), ('user2', 10002), ('user3', 10003)]:
+    for name, id in [("user1", "10001"), ("user2", "10002"), ("user3", "10003")]:
         result = client.tools.id(name)
         assert result is not None
         assert result.user.name == name
-        assert result.user.id == id
+        assert result.user.id == int(id)
 
     client.sssd.stop()
 
-    for name, id in [('user1', 10001), ('user2', 10002), ('user3', 10003)]:
+    for name, id in [("user1", "10001"), ("user2", "10002"), ("user3", "10003")]:
         result = client.tools.id(name)
         assert result is not None
         assert result.user.name == name
-        assert result.user.id == id
+        assert result.user.id == int(id)
 
         result = client.tools.id(id)
         assert result is not None
         assert result.user.name == name
-        assert result.user.id == id
+        assert result.user.id == int(id)
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
@@ -283,35 +284,35 @@ def test_memory_cache__disabled_group(client: Client, provider: GenericProvider)
         9. Groups are not found
     :customerscenario: False
     """
-    u1 = provider.user('user1').add(uid=10001)
-    u2 = provider.user('user2').add(uid=10002)
-    u3 = provider.user('user3').add(uid=10003)
+    u1 = provider.user("user1").add(uid=10001)
+    u2 = provider.user("user2").add(uid=10002)
+    u3 = provider.user("user3").add(uid=10003)
 
-    provider.group('group1').add(gid=1111).add_member(u1)
-    provider.group('group2').add(gid=2222).add_members([u1, u2, u3])
+    provider.group("group1").add(gid=1111).add_member(u1)
+    provider.group("group2").add(gid=2222).add_members([u1, u2, u3])
 
-    client.sssd.nss['memcache_size_group'] = '0'
+    client.sssd.nss["memcache_size_group"] = "0"
     client.sssd.start()
 
-    for user in ['user1', 'user2', 'user3']:
-        result = client.tools.id(user)
-        assert result is not None
-        assert result.user.name == user
+    for user in ["user1", "user2", "user3"]:
+        rUser = client.tools.id(user)
+        assert rUser is not None
+        assert rUser.user.name == user
 
-    for group, members in [(1111, ['user1']), (2222, ['user1', 'user2', 'user3'])]:
+    for group, members in [("1111", ["user1"]), ("2222", ["user1", "user2", "user3"])]:
         result = client.tools.getent.group(group)
         assert result is not None
-        assert result.gid == group
+        assert result.gid == int(group)
         assert result.members == members
 
     client.sssd.stop()
 
-    for user in ['user1', 'user2', 'user3']:
-        result = client.tools.id(user)
-        assert result is not None
-        assert result.user.name == user
+    for user in ["user1", "user2", "user3"]:
+        rUser = client.tools.id(user)
+        assert rUser is not None
+        assert rUser.user.name == user
 
-    for group in ['group1', 'group2', 1111, 2222]:
+    for group in ["group1", "group2", "1111", "2222"]:
         assert client.tools.id(group) is None
 
 
@@ -351,35 +352,35 @@ def test_memory_cache__disabled_cache(client: Client, provider: GenericProvider)
         9. Groups are not found
     :customerscenario: False
     """
-    u1 = provider.user('user1').add(uid=10001)
-    u2 = provider.user('user2').add(uid=10002)
-    u3 = provider.user('user3').add(uid=10003)
+    u1 = provider.user("user1").add(uid=10001)
+    u2 = provider.user("user2").add(uid=10002)
+    u3 = provider.user("user3").add(uid=10003)
 
-    provider.group('group1').add(gid=1111).add_member(u1)
-    provider.group('group2').add(gid=2222).add_members([u1, u2, u3])
+    provider.group("group1").add(gid=1111).add_member(u1)
+    provider.group("group2").add(gid=2222).add_members([u1, u2, u3])
 
-    client.sssd.nss['memcache_size_passwd'] = '0'
-    client.sssd.nss['memcache_size_group'] = '0'
-    client.sssd.nss['memcache_size_initgroups'] = '0'
+    client.sssd.nss["memcache_size_passwd"] = "0"
+    client.sssd.nss["memcache_size_group"] = "0"
+    client.sssd.nss["memcache_size_initgroups"] = "0"
     client.sssd.start()
 
-    for user in ['user1', 'user2', 'user3']:
+    for user in ["user1", "user2", "user3"]:
         result = client.tools.id(user)
         assert result is not None
         assert result.user.name == user
 
-    for group, members in [('group1', ['user1']), ('group2', ['user1', 'user2', 'user3'])]:
-        result = client.tools.getent.group(group)
-        assert result is not None
-        assert result.name == group
-        assert result.members == members
+    for group, members in [("group1", ["user1"]), ("group2", ["user1", "user2", "user3"])]:
+        gresult = client.tools.getent.group(group)
+        assert gresult is not None
+        assert gresult.name == group
+        assert gresult.members == members
 
     client.sssd.stop()
 
-    for user in ['user1', 'user2', 'user3', 10001, 10002, 10003]:
+    for user in ["user1", "user2", "user3", "10001", "10002", "10003"]:
         assert client.tools.id(user) is None
 
-    for group in ['group1', 'group2', 1111, 2222]:
+    for group in ["group1", "group2", "1111", "2222"]:
         assert client.tools.getent.group(group) is None
 
 
@@ -406,28 +407,27 @@ def test_memory_cache__membership_by_group_name(client: Client, provider: Generi
         5. Users are members of correct groups
     :customerscenario: False
     """
-    u1 = provider.user('user1').add()
-    u2 = provider.user('user2').add()
-    u3 = provider.user('user3').add()
+    u1 = provider.user("user1").add()
+    u2 = provider.user("user2").add()
+    u3 = provider.user("user3").add()
 
-    provider.group('group1').add().add_member(u1)
-    provider.group('group2').add().add_member(u1).add_member(u2).add_member(u3)
+    provider.group("group1").add().add_member(u1)
+    provider.group("group2").add().add_member(u1).add_member(u2).add_member(u3)
 
     client.sssd.start()
 
     for i in range(2):
-
-        result = client.tools.id('user1')
+        result = client.tools.id("user1")
         assert result is not None
-        assert result.memberof(['group1', 'group2'])
+        assert result.memberof(["group1", "group2"])
 
-        result = client.tools.id('user2')
+        result = client.tools.id("user2")
         assert result is not None
-        assert result.memberof(['group2'])
+        assert result.memberof(["group2"])
 
-        result = client.tools.id('user3')
+        result = client.tools.id("user3")
         assert result is not None
-        assert result.memberof(['group2'])
+        assert result.memberof(["group2"])
 
         if i == 0:
             client.sssd.stop()
@@ -457,26 +457,26 @@ def test_memory_cache__membership_by_group_id(client: Client, provider: GenericP
         5. Users are members of correct groups
     :customerscenario: False
     """
-    u1 = provider.user('user1').add()
-    u2 = provider.user('user2').add()
-    u3 = provider.user('user3').add()
+    u1 = provider.user("user1").add()
+    u2 = provider.user("user2").add()
+    u3 = provider.user("user3").add()
 
-    provider.group('group1').add(gid=1001).add_member(u1)
-    provider.group('group2').add(gid=1002).add_members([u1, u2, u3])
-    provider.group('group3').add(gid=1003)
+    provider.group("group1").add(gid=1001).add_member(u1)
+    provider.group("group2").add(gid=1002).add_members([u1, u2, u3])
+    provider.group("group3").add(gid=1003)
 
     client.sssd.start()
 
     for i in range(2):
-        result = client.tools.id('user1')
+        result = client.tools.id("user1")
         assert result is not None
         assert result.memberof([1001, 1002])
 
-        result = client.tools.id('user2')
+        result = client.tools.id("user2")
         assert result is not None
         assert result.memberof([1002])
 
-        result = client.tools.id('user3')
+        result = client.tools.id("user3")
         assert result is not None
         assert result.memberof([1002])
 
@@ -509,25 +509,25 @@ def test_memory_cache__user_gids(client: Client, provider: GenericProvider):
         5. Users are members of correct groups
     :customerscenario: False
     """
-    u1 = provider.user('user1').add(uid=2001, gid=101)
-    u2 = provider.user('user2').add(uid=2002, gid=102)
-    u3 = provider.user('user3').add(uid=2003, gid=103)
+    u1 = provider.user("user1").add(uid=2001, gid=101)
+    u2 = provider.user("user2").add(uid=2002, gid=102)
+    u3 = provider.user("user3").add(uid=2003, gid=103)
 
-    provider.group('group1').add(gid=1001).add_member(u1)
-    provider.group('group2').add(gid=1002).add_members([u1, u2, u3])
+    provider.group("group1").add(gid=1001).add_member(u1)
+    provider.group("group2").add(gid=1002).add_members([u1, u2, u3])
 
     client.sssd.start()
 
     for i in range(2):
-        result = client.tools.id(2001)
+        result = client.tools.id("2001")
         assert result is not None
         assert result.memberof([101, 1001, 1002])
 
-        result = client.tools.id(2002)
+        result = client.tools.id("2002")
         assert result is not None
         assert result.memberof([102, 1002])
 
-        result = client.tools.id(2003)
+        result = client.tools.id("2003")
         assert result is not None
         assert result.memberof([103, 1002])
 
@@ -561,23 +561,23 @@ def test_memory_cache__getpwnam_fully_qualified_names(client: Client, provider: 
         7. Users have correct full names
     :customerscenario: False
     """
-    u1 = provider.user('user1').add()
-    u2 = provider.user('user2').add()
+    provider.user("user1").add()
+    provider.user("user2").add()
 
-    client.sssd.domain['use_fully_qualified_names'] = 'true'
+    client.sssd.domain["use_fully_qualified_names"] = "true"
     client.sssd.start()
 
     for i in range(2):
-        assert client.tools.id('user1') is None
-        assert client.tools.id('user2') is None
+        assert client.tools.id("user1") is None
+        assert client.tools.id("user2") is None
 
-        result = client.tools.id('user1@test')
+        result = client.tools.id("user1@test")
         assert result is not None
-        assert result.user.name == 'user1@test'
+        assert result.user.name == "user1@test"
 
-        result = client.tools.id('user2@test')
+        result = client.tools.id("user2@test")
         assert result is not None
-        assert result.user.name == 'user2@test'
+        assert result.user.name == "user2@test"
 
         if i == 0:
             client.sssd.stop()
@@ -616,36 +616,34 @@ def test_memory_cache__case_insensitive(client: Client, provider: GenericProvide
         7. Users are not found
     :customerscenario: False
     """
-    u1 = provider.user('user1').add(gid=2001)
-    provider.group('group1').add(gid=1001).add_members([u1])
+    u1 = provider.user("user1").add(gid=2001)
+    provider.group("group1").add(gid=1001).add_members([u1])
 
-    client.sssd.domain['case_sensitive'] = 'false'
+    client.sssd.domain["case_sensitive"] = "false"
     client.sssd.start()
 
-    u1_groups = [2001, 1001]
-
-    for name in ['uSer1', 'useR1', 'uSER1']:
+    for name in ["uSer1", "useR1", "uSER1"]:
         result = client.tools.id(name)
         assert result is not None
         assert result.user.name == name.lower()
-        assert result.memberof(u1_groups)
+        assert result.memberof(["2001", "1001"])
 
     client.sssd.stop()
 
-    result = client.tools.id('uSER1')
+    result = client.tools.id("uSER1")
     assert result is not None
-    assert result.user.name == name.lower()
-    assert result.memberof(u1_groups)
+    assert result.user.name == "uSER1".lower()
+    assert result.memberof(["2001", "1001"])
 
-    assert client.tools.id('uSer1') is None
-    assert client.tools.id('useR1') is None
+    assert client.tools.id("uSer1") is None
+    assert client.tools.id("useR1") is None
 
 
 # NOT WORKING
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_memory_cache__fq_names_case_insensitive(client: Client, provider: GenericProvider):
     """
-    :title: User by id(), case insensitive fq name when 'case_sensitive' is 'false', 
+    :title: User by id(), case insensitive fq name when 'case_sensitive' is 'false'
             'use_fully_qualified_names' is 'true' and SSSD is stopped
     :setup:
         1. Add 'user1', 'user2' and 'user3' to SSSD
@@ -672,86 +670,86 @@ def test_memory_cache__fq_names_case_insensitive(client: Client, provider: Gener
         6. Users are not found
     :customerscenario: False
     """
-    u1 = provider.user('user1').add(gid=10100)
-    u2 = provider.user('user2').add(gid=10200)
-    u3 = provider.user('user3').add(gid=10300)
+    u1 = provider.user("user1").add(gid=10100)
+    u2 = provider.user("user2").add(gid=10200)
+    u3 = provider.user("user3").add(gid=10300)
 
-    provider.group('group1').add(gid=20001).add_members([u1])
-    provider.group('group2').add(gid=20002).add_members([u1, u2])
-    provider.group('group3').add(gid=20003).add_members([u1, u2, u3])
+    provider.group("group1").add(gid=20001).add_members([u1])
+    provider.group("group2").add(gid=20002).add_members([u1, u2])
+    provider.group("group3").add(gid=20003).add_members([u1, u2, u3])
 
-    client.sssd.domain['use_fully_qualified_names'] = 'true'
-    client.sssd.domain['case_sensitive'] = 'false'
+    client.sssd.domain["use_fully_qualified_names"] = "true"
+    client.sssd.domain["case_sensitive"] = "false"
     client.sssd.start()
 
-    result = client.tools.id('uSer1@test')
+    result = client.tools.id("uSer1@test")
     assert result is not None
     assert result.memberof([10100, 20001, 20002, 20003])
 
     client.sssd.stop()
 
-    result = client.tools.id('uSer1@test')
+    result = client.tools.id("uSer1@test")
     assert result is not None
     assert result.memberof([10100, 20001, 20002, 20003])
 
-    assert client.tools.id('user1') is None
-    assert client.tools.id('user2') is None
-    assert client.tools.id('user3') is None
+    assert client.tools.id("user1") is None
+    assert client.tools.id("user2") is None
+    assert client.tools.id("user3") is None
 
 
 # NOT WORKING
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_memory_cache__invalidatation_of_gids_after_initgroups(client: Client, provider: GenericProvider):
-    u1 = provider.user('user1').add(uid=10001, gid=1234)
-    u2 = provider.user('user2').add(uid=10002, gid=102)
+    u1 = provider.user("user1").add(uid=10001, gid=1234)
+    u2 = provider.user("user2").add(uid=10002, gid=102)
 
-    provider.group('group1').add(gid=12345).add_member(u1)
-    provider.group('group2').add(gid=1002).add_member(u2)
+    provider.group("group1").add(gid=12345).add_member(u1)
+    provider.group("group2").add(gid=1002).add_member(u2)
 
     client.sssd.start()
 
-    result = client.tools.id('user1')
+    result = client.tools.id("user1")
     assert result is not None
     assert result.memberof([1234, 12345])
 
-    result = client.tools.id(10001)
+    result = client.tools.id("10001")
     assert result is not None
     assert result.memberof([1234, 12345])
 
-    result = client.tools.getent.group('group1')
-    assert result is not None
-    assert result.name == 'group1'
+    gresult = client.tools.getent.group("group1")
+    assert gresult is not None
+    assert gresult.name == "group1"
 
-    result = client.tools.getent.group('group2')
-    assert result is not None
-    assert result.name == 'group2'
+    gresult = client.tools.getent.group("group2")
+    assert gresult is not None
+    assert gresult.name == "group2"
 
     client.sssd.stop()
 
-    result = client.tools.id('user1')
+    result = client.tools.id("user1")
     assert result is not None
     assert result.memberof([1234, 12345])
-    result = client.tools.id(10001)
+    result = client.tools.id("10001")
     assert result is not None
     assert result.memberof([1234, 12345])
 
-    result = client.tools.getent.group('group2')
-    assert result is not None
-    assert result.name == 'group2'
-    result = client.tools.getent.group(1002)
-    assert result is not None
-    assert result.name == 'group2'
+    gresult = client.tools.getent.group("group2")
+    assert gresult is not None
+    assert gresult.name == "group2"
+    gresult = client.tools.getent.group("1002")
+    assert gresult is not None
+    assert gresult.name == "group2"
 
-    result = client.tools.id('user1')
+    result = client.tools.id("user1")
     assert result is not None
     assert result.memberof([1234, 12345])
-    result = client.tools.id(10001)
+    result = client.tools.id("10001")
     assert result is not None
     assert result.memberof([1234, 12345])
 
     assert client.tools.getent.group(1234) is None
     assert client.tools.getent.group(12345) is None
-    assert client.tools.getent.group('group1') is None
+    assert client.tools.getent.group("group1") is None
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
@@ -797,30 +795,30 @@ def test_memory_cache__initgroups_without_change_in_membership(client: Client, p
         14. Group has correct name and gid
     :customerscenario: False
     """
-    u1 = provider.user('user1').add(uid=10001, gid=111)
-    provider.group('group1').add(gid=12345).add_member(u1)
+    u1 = provider.user("user1").add(uid=10001, gid=111)
+    provider.group("group1").add(gid=12345).add_member(u1)
 
     client.sssd.start()
 
     for i in range(3):
-        result = client.tools.id('user1')
+        result = client.tools.id("user1")
         assert result is not None
         assert result.memberof([111, 12345])
 
-        result = client.tools.id(10001)
+        result = client.tools.id("10001")
         assert result is not None
         assert result.memberof([111, 12345])
 
-        result = client.tools.getent.group('group1')
-        assert result is not None
-        assert result.gid == 12345
+        gresult = client.tools.getent.group("group1")
+        assert gresult is not None
+        assert gresult.gid == 12345
 
-        result = client.tools.getent.group(12345)
-        assert result is not None
-        assert result.name == 'group1'
+        gresult = client.tools.getent.group("12345")
+        assert gresult is not None
+        assert gresult.name == "group1"
 
         if i == 0:
-            client.sssctl.cache_expire('-E')
+            client.sssctl.cache_expire("-E")
         elif i == 1:
             client.sssd.stop()
 
@@ -854,28 +852,28 @@ def test_memory_cache__invalidate_user_before_stop(client: Client, provider: Gen
         7. Group is not found
     :customerscenario: False
     """
-    u1 = provider.user('user1').add(uid=123456, gid=110011)
-    u2 = provider.user('user2').add(uid=220022, gid=222222)
+    u1 = provider.user("user1").add(uid=123456, gid=110011)
+    u2 = provider.user("user2").add(uid=220022, gid=222222)
 
-    provider.group('group1').add(gid=101010).add_member(u1)
-    provider.group('group2').add(gid=202020).add_members([u1, u2])
+    provider.group("group1").add(gid=101010).add_member(u1)
+    provider.group("group2").add(gid=202020).add_members([u1, u2])
 
     client.sssd.start()
 
-    result = client.tools.id('user1')
+    result = client.tools.id("user1")
     assert result is not None
     assert result.user.id == 123456
     assert result.memberof([110011, 101010, 202020])
 
-    client.sssctl.cache_expire('-u', 'user1')
+    client.sssctl.cache_expire("-u", "user1")
     client.sssd.stop()
 
-    assert client.tools.id('user1') is None
-    assert client.tools.id(123456) is None
-    assert client.tools.getent.group('group1') is None
-    assert client.tools.getent.group(110011) is None
-    assert client.tools.getent.group('group2') is None
-    assert client.tools.getent.group(202020) is None
+    assert client.tools.id("user1") is None
+    assert client.tools.id("123456") is None
+    assert client.tools.getent.group("group1") is None
+    assert client.tools.getent.group("110011") is None
+    assert client.tools.getent.group("group2") is None
+    assert client.tools.getent.group("202020") is None
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
@@ -907,28 +905,28 @@ def test_memory_cache__invalidate_user_after_stop(client: Client, provider: Gene
         7. Group is not found
     :customerscenario: False
     """
-    u1 = provider.user('user1').add(uid=123456, gid=110011)
-    u2 = provider.user('user2').add(uid=220022, gid=222222)
+    u1 = provider.user("user1").add(uid=123456, gid=110011)
+    u2 = provider.user("user2").add(uid=220022, gid=222222)
 
-    provider.group('group1').add(gid=101010).add_member(u1)
-    provider.group('group2').add(gid=202020).add_members([u1, u2])
+    provider.group("group1").add(gid=101010).add_member(u1)
+    provider.group("group2").add(gid=202020).add_members([u1, u2])
 
     client.sssd.start()
 
-    result = client.tools.id('user1')
+    result = client.tools.id("user1")
     assert result is not None
     assert result.user.id == 123456
     assert result.memberof([110011, 101010, 202020])
 
     client.sssd.stop()
-    client.sssctl.cache_expire('-u', 'user1')
+    client.sssctl.cache_expire("-u", "user1")
 
-    assert client.tools.id('user1') is None
-    assert client.tools.id(123456) is None
-    assert client.tools.getent.group('group1') is None
-    assert client.tools.getent.group(110011) is None
-    assert client.tools.getent.group('group2') is None
-    assert client.tools.getent.group(202020) is None
+    assert client.tools.id("user1") is None
+    assert client.tools.id("123456") is None
+    assert client.tools.getent.group("group1") is None
+    assert client.tools.getent.group("110011") is None
+    assert client.tools.getent.group("group2") is None
+    assert client.tools.getent.group("202020") is None
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
@@ -960,36 +958,36 @@ def test_memory_cache__invalidate_users_before_stop(client: Client, provider: Ge
         7. Groups are not found
     :customerscenario: False
     """
-    u1 = provider.user('user1').add(uid=123456, gid=110011)
-    u2 = provider.user('user2').add(uid=220022, gid=222222)
+    u1 = provider.user("user1").add(uid=123456, gid=110011)
+    u2 = provider.user("user2").add(uid=220022, gid=222222)
 
-    provider.group('group1').add(gid=101010).add_member(u1)
-    provider.group('group2').add(gid=202020).add_members([u1, u2])
+    provider.group("group1").add(gid=101010).add_member(u1)
+    provider.group("group2").add(gid=202020).add_members([u1, u2])
 
     client.sssd.start()
 
-    result = client.tools.id('user1')
+    result = client.tools.id("user1")
     assert result is not None
     assert result.user.id == 123456
     assert result.memberof([110011, 101010, 202020])
 
-    result = client.tools.id('user2')
+    result = client.tools.id("user2")
     assert result is not None
     assert result.user.id == 220022
     assert result.memberof([222222, 202020])
 
-    client.sssctl.cache_expire('-U')
+    client.sssctl.cache_expire("-U")
     client.sssd.stop()
 
-    assert client.tools.id('user1') is None
-    assert client.tools.id(123456) is None
-    assert client.tools.getent.group('group1') is None
-    assert client.tools.getent.group(110011) is None
-    assert client.tools.getent.group('group2') is None
-    assert client.tools.getent.group(202020) is None
-    assert client.tools.id('user2') is None
-    assert client.tools.id(220022) is None
-    assert client.tools.getent.group(222222) is None
+    assert client.tools.id("user1") is None
+    assert client.tools.id("123456") is None
+    assert client.tools.getent.group("group1") is None
+    assert client.tools.getent.group("110011") is None
+    assert client.tools.getent.group("group2") is None
+    assert client.tools.getent.group("202020") is None
+    assert client.tools.id("user2") is None
+    assert client.tools.id("220022") is None
+    assert client.tools.getent.group("222222") is None
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
@@ -1021,36 +1019,36 @@ def test_memory_cache__invalidate_users_after_stop(client: Client, provider: Gen
         7. Groups are not found
     :customerscenario: False
     """
-    u1 = provider.user('user1').add(uid=123456, gid=110011)
-    u2 = provider.user('user2').add(uid=220022, gid=222222)
+    u1 = provider.user("user1").add(uid=123456, gid=110011)
+    u2 = provider.user("user2").add(uid=220022, gid=222222)
 
-    provider.group('group1').add(gid=101010).add_member(u1)
-    provider.group('group2').add(gid=202020).add_members([u1, u2])
+    provider.group("group1").add(gid=101010).add_member(u1)
+    provider.group("group2").add(gid=202020).add_members([u1, u2])
 
     client.sssd.start()
 
-    result = client.tools.id('user1')
+    result = client.tools.id("user1")
     assert result is not None
     assert result.user.id == 123456
     assert result.memberof([110011, 101010, 202020])
 
-    result = client.tools.id('user2')
+    result = client.tools.id("user2")
     assert result is not None
     assert result.user.id == 220022
     assert result.memberof([222222, 202020])
 
     client.sssd.stop()
-    client.sssctl.cache_expire('-U')
+    client.sssctl.cache_expire("-U")
 
-    assert client.tools.id('user1') is None
-    assert client.tools.id(123456) is None
-    assert client.tools.getent.group('group1') is None
-    assert client.tools.getent.group(110011) is None
-    assert client.tools.getent.group('group2') is None
-    assert client.tools.getent.group(202020) is None
-    assert client.tools.id('user2') is None
-    assert client.tools.id(220022) is None
-    assert client.tools.getent.group(222222) is None
+    assert client.tools.id("user1") is None
+    assert client.tools.id("123456") is None
+    assert client.tools.getent.group("group1") is None
+    assert client.tools.getent.group("110011") is None
+    assert client.tools.getent.group("group2") is None
+    assert client.tools.getent.group("202020") is None
+    assert client.tools.id("user2") is None
+    assert client.tools.id("220022") is None
+    assert client.tools.getent.group("222222") is None
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
@@ -1077,19 +1075,19 @@ def test_memory_cache__invalidate_group_before_stop(client: Client, provider: Ge
         6. Group is not found
     :customerscenario: False
     """
-    provider.group('group1').add(gid=101010)
+    provider.group("group1").add(gid=101010)
 
     client.sssd.start()
 
-    result = client.tools.getent.group('group1')
+    result = client.tools.getent.group("group1")
     assert result is not None
-    assert result.name == 'group1'
+    assert result.name == "group1"
     assert result.gid == 101010
 
-    client.sssctl.cache_expire('-g', 'group1')
+    client.sssctl.cache_expire("-g", "group1")
     client.sssd.stop()
 
-    assert client.tools.getent.group('group1') is None
+    assert client.tools.getent.group("group1") is None
     assert client.tools.getent.group(110011) is None
 
 
@@ -1117,19 +1115,19 @@ def test_memory_cache__invalidate_group_after_stop(client: Client, provider: Gen
         6. Group is not found
     :customerscenario: False
     """
-    provider.group('group1').add(gid=101010)
+    provider.group("group1").add(gid=101010)
 
     client.sssd.start()
 
-    result = client.tools.getent.group('group1')
+    result = client.tools.getent.group("group1")
     assert result is not None
-    assert result.name == 'group1'
+    assert result.name == "group1"
     assert result.gid == 101010
 
     client.sssd.stop()
-    client.sssctl.cache_expire('-g', 'group1')
+    client.sssctl.cache_expire("-g", "group1")
 
-    assert client.tools.getent.group('group1') is None
+    assert client.tools.getent.group("group1") is None
     assert client.tools.getent.group(110011) is None
 
 
@@ -1155,25 +1153,25 @@ def test_memory_cache__invalidate_groups_before_stop(client: Client, provider: G
         5. Groups are not found
     :customerscenario: False
     """
-    provider.group('group1').add(gid=101010)
-    provider.group('group2').add(gid=202020)
+    provider.group("group1").add(gid=101010)
+    provider.group("group2").add(gid=202020)
 
     client.sssd.start()
 
-    result = client.tools.getent.group('group1')
+    result = client.tools.getent.group("group1")
     assert result is not None
     assert result.gid == 101010
-    
-    result = client.tools.getent.group('group2')
+
+    result = client.tools.getent.group("group2")
     assert result is not None
     assert result.gid == 202020
 
-    client.sssctl.cache_expire('-G')
+    client.sssctl.cache_expire("-G")
     client.sssd.stop()
 
-    assert client.tools.getent.group('group1') is None
+    assert client.tools.getent.group("group1") is None
     assert client.tools.getent.group(110011) is None
-    assert client.tools.getent.group('group2') is None
+    assert client.tools.getent.group("group2") is None
     assert client.tools.getent.group(202020) is None
 
 
@@ -1199,25 +1197,25 @@ def test_memory_cache__invalidate_groups_after_stop(client: Client, provider: Ge
         5. Groups are not found
     :customerscenario: False
     """
-    provider.group('group1').add(gid=101010)
-    provider.group('group2').add(gid=202020)
+    provider.group("group1").add(gid=101010)
+    provider.group("group2").add(gid=202020)
 
     client.sssd.start()
 
-    result = client.tools.getent.group('group1')
+    result = client.tools.getent.group("group1")
     assert result is not None
     assert result.gid == 101010
-    
-    result = client.tools.getent.group('group2')
+
+    result = client.tools.getent.group("group2")
     assert result is not None
     assert result.gid == 202020
 
     client.sssd.stop()
-    client.sssctl.cache_expire('-G')
+    client.sssctl.cache_expire("-G")
 
-    assert client.tools.getent.group('group1') is None
+    assert client.tools.getent.group("group1") is None
     assert client.tools.getent.group(110011) is None
-    assert client.tools.getent.group('group2') is None
+    assert client.tools.getent.group("group2") is None
     assert client.tools.getent.group(202020) is None
 
 
@@ -1252,41 +1250,41 @@ def test_memory_cache__invalidate_everything_before_stop(client: Client, provide
         8. Groups are not found
     :customerscenario: False
     """
-    u1 = provider.user('user1').add(uid=123456, gid=110011)
-    u2 = provider.user('user2').add(uid=220022, gid=222222)
+    u1 = provider.user("user1").add(uid=123456, gid=110011)
+    u2 = provider.user("user2").add(uid=220022, gid=222222)
 
-    provider.group('group1').add(gid=101010).add_member(u1)
-    provider.group('group2').add(gid=202020).add_members([u1, u2])
+    provider.group("group1").add(gid=101010).add_member(u1)
+    provider.group("group2").add(gid=202020).add_members([u1, u2])
 
     client.sssd.start()
 
-    result = client.tools.id('user1')
+    result = client.tools.id("user1")
     assert result is not None
     assert result.user.id == 123456
 
-    result = client.tools.id('user2')
+    result = client.tools.id("user2")
     assert result is not None
     assert result.user.id == 220022
 
-    result = client.tools.getent.group('group1')
-    assert result is not None
-    assert result.gid == 101010
-    
-    result = client.tools.getent.group('group2')
-    assert result is not None
-    assert result.gid == 202020
+    gresult = client.tools.getent.group("group1")
+    assert gresult is not None
+    assert gresult.gid == 101010
 
-    client.sssctl.cache_expire('-E')
+    gresult = client.tools.getent.group("group2")
+    assert gresult is not None
+    assert gresult.gid == 202020
+
+    client.sssctl.cache_expire("-E")
     client.sssd.stop()
 
-    assert client.tools.id('user1') is None
-    assert client.tools.id(123456) is None
-    assert client.tools.id('user2') is None
-    assert client.tools.id(220022) is None
-    assert client.tools.getent.group('group1') is None
-    assert client.tools.getent.group(110011) is None
-    assert client.tools.getent.group('group2') is None
-    assert client.tools.getent.group(202020) is None
+    assert client.tools.id("user1") is None
+    assert client.tools.id("123456") is None
+    assert client.tools.id("user2") is None
+    assert client.tools.id("220022") is None
+    assert client.tools.getent.group("group1") is None
+    assert client.tools.getent.group("110011") is None
+    assert client.tools.getent.group("group2") is None
+    assert client.tools.getent.group("202020") is None
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
@@ -1320,41 +1318,41 @@ def test_memory_cache__invalidate_everything_after_stop(client: Client, provider
         8. Groups are not found
     :customerscenario: False
     """
-    u1 = provider.user('user1').add(uid=123456, gid=110011)
-    u2 = provider.user('user2').add(uid=220022, gid=222222)
+    u1 = provider.user("user1").add(uid=123456, gid=110011)
+    u2 = provider.user("user2").add(uid=220022, gid=222222)
 
-    provider.group('group1').add(gid=101010).add_member(u1)
-    provider.group('group2').add(gid=202020).add_members([u1, u2])
+    provider.group("group1").add(gid=101010).add_member(u1)
+    provider.group("group2").add(gid=202020).add_members([u1, u2])
 
     client.sssd.start()
 
-    result = client.tools.id('user1')
+    result = client.tools.id("user1")
     assert result is not None
     assert result.user.id == 123456
 
-    result = client.tools.id('user2')
+    result = client.tools.id("user2")
     assert result is not None
     assert result.user.id == 220022
 
-    result = client.tools.getent.group('group1')
-    assert result is not None
-    assert result.gid == 101010
-    
-    result = client.tools.getent.group('group2')
-    assert result is not None
-    assert result.gid == 202020
+    gresult = client.tools.getent.group("group1")
+    assert gresult is not None
+    assert gresult.gid == 101010
+
+    gresult = client.tools.getent.group("group2")
+    assert gresult is not None
+    assert gresult.gid == 202020
 
     client.sssd.stop()
-    client.sssctl.cache_expire('-E')
+    client.sssctl.cache_expire("-E")
 
-    assert client.tools.id('user1') is None
-    assert client.tools.id(123456) is None
-    assert client.tools.id('user2') is None
-    assert client.tools.id(220022) is None
-    assert client.tools.getent.group('group1') is None
-    assert client.tools.getent.group(110011) is None
-    assert client.tools.getent.group('group2') is None
-    assert client.tools.getent.group(202020) is None
+    assert client.tools.id("user1") is None
+    assert client.tools.id("123456") is None
+    assert client.tools.id("user2") is None
+    assert client.tools.id("220022") is None
+    assert client.tools.getent.group("group1") is None
+    assert client.tools.getent.group("110011") is None
+    assert client.tools.getent.group("group2") is None
+    assert client.tools.getent.group("202020") is None
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
@@ -1388,30 +1386,30 @@ def test_memory_cache__memcache_timeout_zero(client: Client, provider: GenericPr
         8. Group is not found
     :customerscenario: False
     """
-    provider.user('user1').add(uid=123456)
-    provider.group('group1').add(gid=10001)
+    provider.user("user1").add(uid=123456)
+    provider.group("group1").add(gid=10001)
 
-    client.sssd.nss['memcache_timeout'] = '0'
+    client.sssd.nss["memcache_timeout"] = "0"
     client.sssd.start()
 
     r = client.sssctl.cache_ls()
-    assert r.stdout == ''
-    assert r.stderr == ''
+    assert r.stdout == ""
+    assert r.stderr == ""
 
-    result = client.tools.id('user1')
+    result = client.tools.id("user1")
     assert result is not None
     assert result.user.id == 123456
 
-    result = client.tools.getent.group('group1')
-    assert result is not None
-    assert result.gid == 10001
+    gresult = client.tools.getent.group("group1")
+    assert gresult is not None
+    assert gresult.gid == 10001
 
     client.sssd.stop()
 
-    assert client.tools.id('user1') is None
-    assert client.tools.id(123456) is None
-    assert client.tools.getent.group('group1') is None
-    assert client.tools.getent.group(10001) is None
+    assert client.tools.id("user1") is None
+    assert client.tools.id("123456") is None
+    assert client.tools.getent.group("group1") is None
+    assert client.tools.getent.group("10001") is None
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
@@ -1444,24 +1442,24 @@ def test_memory_cache__removed_cache_without_invalidation(client: Client, provid
         8. Group is not found
     :customerscenario: True
     """
-    provider.user('user1').add(uid=123456)
-    provider.group('group1').add(gid=10001)
+    provider.user("user1").add(uid=123456)
+    provider.group("group1").add(gid=10001)
 
     client.sssd.start()
 
-    result = client.tools.id('user1')
+    result = client.tools.id("user1")
     assert result is not None
     assert result.user.id == 123456
 
-    result = client.tools.getent.group('group1')
-    assert result is not None
-    assert result.gid == 10001
+    gresult = client.tools.getent.group("group1")
+    assert gresult is not None
+    assert gresult.gid == 10001
 
     client.sssd.stop()
 
     client.sssctl.remove_cache_files()
 
-    assert client.tools.id('user1') is None
-    assert client.tools.id(123456) is None
-    assert client.tools.getent.group('group1') is None
-    assert client.tools.getent.group(10001) is None
+    assert client.tools.id("user1") is None
+    assert client.tools.id("123456") is None
+    assert client.tools.getent.group("group1") is None
+    assert client.tools.getent.group("10001") is None

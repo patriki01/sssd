@@ -1,8 +1,9 @@
-import pytest
+from __future__ import annotations
 
-from lib.sssd.roles.client import Client
-from lib.sssd.roles.generic import GenericProvider
-from lib.sssd.topology import KnownTopologyGroup
+import pytest
+from sssd_test_framework.roles.client import Client
+from sssd_test_framework.roles.generic import GenericProvider
+from sssd_test_framework.topology import KnownTopologyGroup
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
@@ -23,13 +24,13 @@ def test_id__getpwnam(client: Client, provider: GenericProvider):
         3. Users have correct ids
     :customerscenario: False
     """
-    provider.user('user1').add(uid=1001)
-    provider.user('user2').add(uid=1002)
-    provider.user('user3').add(uid=1003)
+    provider.user("user1").add(uid=1001)
+    provider.user("user2").add(uid=1002)
+    provider.user("user3").add(uid=1003)
 
     client.sssd.start()
 
-    for name, uid in [('user1', 1001), ('user2', 1002), ('user3', 1003)]:
+    for name, uid in [("user1", 1001), ("user2", 1002), ("user3", 1003)]:
         result = client.tools.id(name)
         assert result is not None
         assert result.user.name == name
@@ -54,17 +55,17 @@ def test_id__getpwuid(client: Client, provider: GenericProvider):
         3. Users have correct ids
     :customerscenario: False
     """
-    provider.user('user1').add(uid=1001)
-    provider.user('user2').add(uid=1002)
-    provider.user('user3').add(uid=1003)
+    provider.user("user1").add(uid=1001)
+    provider.user("user2").add(uid=1002)
+    provider.user("user3").add(uid=1003)
 
     client.sssd.start()
 
-    for name, uid in [('user1', 1001), ('user2', 1002), ('user3', 1003)]:
+    for name, uid in [("user1", "1001"), ("user2", "1002"), ("user3", "1003")]:
         result = client.tools.id(uid)
         assert result is not None
         assert result.user.name == name
-        assert result.user.id == uid
+        assert result.user.id == int(uid)
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
@@ -85,13 +86,13 @@ def test_id__getgrnam(client: Client, provider: GenericProvider):
         3. Groups have correct gids
     :customerscenario: False
     """
-    provider.group('group1').add(gid=1001)
-    provider.group('group2').add(gid=1002)
-    provider.group('group3').add(gid=1003)
+    provider.group("group1").add(gid=1001)
+    provider.group("group2").add(gid=1002)
+    provider.group("group3").add(gid=1003)
 
     client.sssd.start()
 
-    for name, gid in [('group1', 1001), ('group2', 1002), ('group3', 1003)]:
+    for name, gid in [("group1", 1001), ("group2", 1002), ("group3", 1003)]:
         result = client.tools.getent.group(name)
         assert result is not None
         assert result.name == name
@@ -116,13 +117,13 @@ def test_id__getgrgid(client: Client, provider: GenericProvider):
         3. Groups have correct gids
     :customerscenario: False
     """
-    provider.group('group1').add(gid=1001)
-    provider.group('group2').add(gid=1002)
-    provider.group('group3').add(gid=1003)
+    provider.group("group1").add(gid=1001)
+    provider.group("group2").add(gid=1002)
+    provider.group("group3").add(gid=1003)
 
     client.sssd.start()
 
-    for name, gid in [('group1', 1001), ('group2', 1002), ('group3', 1003)]:
+    for name, gid in [("group1", 1001), ("group2", 1002), ("group3", 1003)]:
         result = client.tools.getent.group(gid)
         assert result is not None
         assert result.name == name
@@ -151,22 +152,28 @@ def test_id__getent_passwd(client: Client, provider: GenericProvider):
         4. Users have correct ids
     :customerscenario: False
     """
-    u1 = provider.user('user1').add(uid=10001)
-    u2 = provider.user('user2').add(uid=10002)
-    u3 = provider.user('user3').add(uid=10003)
+    u1 = provider.user("user1").add(uid=10001)
+    u2 = provider.user("user2").add(uid=10002)
+    u3 = provider.user("user3").add(uid=10003)
 
-    provider.group('group1').add().add_member(u1)
-    provider.group('group2').add().add_members([u1, u2])
-    provider.group('group3').add().add_members([u1, u2, u3])
+    provider.group("group1").add().add_member(u1)
+    provider.group("group2").add().add_members([u1, u2])
+    provider.group("group3").add().add_members([u1, u2, u3])
 
     client.sssd.start()
 
-    assert client.tools.getent.passwd('user1').uid == 10001
-    assert client.tools.getent.passwd(10001).name == 'user1'
-    assert client.tools.getent.passwd('user2').uid == 10002
-    assert client.tools.getent.passwd(10002).name == 'user2'
-    assert client.tools.getent.passwd('user3').uid == 10003
-    assert client.tools.getent.passwd(10003).name == 'user3'
+    r = client.tools.getent.passwd("user1")
+    assert r is not None and r.uid == 10001
+    r = client.tools.getent.passwd(10001)
+    assert r is not None and r.name == "user1"
+    r = client.tools.getent.passwd("user2")
+    assert r is not None and r.uid == 10002
+    r = client.tools.getent.passwd(10002)
+    assert r is not None and r.name == "user2"
+    r = client.tools.getent.passwd("user3")
+    assert r is not None and r.uid == 10003
+    r = client.tools.getent.passwd(10003)
+    assert r is not None and r.name == "user3"
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
@@ -191,25 +198,34 @@ def test_id__getent_group(client: Client, provider: GenericProvider):
         4. Groups have correct users added
     :customerscenario: False
     """
-    u1 = provider.user('user1').add()
-    u2 = provider.user('user2').add()
-    u3 = provider.user('user3').add()
+    u1 = provider.user("user1").add()
+    u2 = provider.user("user2").add()
+    u3 = provider.user("user3").add()
 
-    provider.group('group1').add(gid=10001).add_member(u1)
-    provider.group('group2').add(gid=10002).add_members([u1, u2])
-    provider.group('group3').add(gid=10003).add_members([u1, u2, u3])
+    provider.group("group1").add(gid=10001).add_member(u1)
+    provider.group("group2").add(gid=10002).add_members([u1, u2])
+    provider.group("group3").add(gid=10003).add_members([u1, u2, u3])
 
     client.sssd.start()
 
-    assert client.tools.getent.group('group1').members == ['user1']
-    assert client.tools.getent.group(10001).name == 'group1'
-    assert client.tools.getent.group(10001).members == ['user1']
-    assert client.tools.getent.group('group2').members == ['user1', 'user2']
-    assert client.tools.getent.group(10002).name == 'group2'
-    assert client.tools.getent.group(10002).members == ['user1', 'user2']
-    assert client.tools.getent.group('group3').members == ['user1', 'user2', 'user3']
-    assert client.tools.getent.group(10003).name == 'group3'
-    assert client.tools.getent.group(10003).members == ['user1', 'user2', 'user3']
+    r = client.tools.getent.group("group1")
+    assert r is not None and r.members == ["user1"]
+    r = client.tools.getent.group(10001)
+    assert r is not None and r.name == "group1"
+    r = client.tools.getent.group(10001)
+    assert r is not None and r.members == ["user1"]
+    r = client.tools.getent.group("group2")
+    assert r is not None and r.members == ["user1", "user2"]
+    r = client.tools.getent.group(10002)
+    assert r is not None and r.name == "group2"
+    r = client.tools.getent.group(10002)
+    assert r is not None and r.members == ["user1", "user2"]
+    r = client.tools.getent.group("group3")
+    assert r is not None and r.members == ["user1", "user2", "user3"]
+    r = client.tools.getent.group(10003)
+    assert r is not None and r.name == "group3"
+    r = client.tools.getent.group(10003)
+    assert r is not None and r.members == ["user1", "user2", "user3"]
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
@@ -229,26 +245,26 @@ def test_id__membership_by_group_name(client: Client, provider: GenericProvider)
         2. Users are members of correct groups
     :customerscenario: False
     """
-    u1 = provider.user('user1').add()
-    u2 = provider.user('user2').add()
-    u3 = provider.user('user3').add()
+    u1 = provider.user("user1").add()
+    u2 = provider.user("user2").add()
+    u3 = provider.user("user3").add()
 
-    provider.group('group1').add().add_member(u1)
-    provider.group('group2').add().add_members([u1, u2, u3])
+    provider.group("group1").add().add_member(u1)
+    provider.group("group2").add().add_members([u1, u2, u3])
 
     client.sssd.start()
 
-    result = client.tools.id('user1')
+    result = client.tools.id("user1")
     assert result is not None
-    assert result.memberof(['group1', 'group2'])
+    assert result.memberof(["group1", "group2"])
 
-    result = client.tools.id('user2')
+    result = client.tools.id("user2")
     assert result is not None
-    assert result.memberof(['group2'])
+    assert result.memberof(["group2"])
 
-    result = client.tools.id('user3')
+    result = client.tools.id("user3")
     assert result is not None
-    assert result.memberof(['group2'])
+    assert result.memberof(["group2"])
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
@@ -268,25 +284,25 @@ def test_id__membership_by_group_id(client: Client, provider: GenericProvider):
         2. Users are members of correct groups
     :customerscenario: False
     """
-    u1 = provider.user('user1').add()
-    u2 = provider.user('user2').add()
-    u3 = provider.user('user3').add()
+    u1 = provider.user("user1").add()
+    u2 = provider.user("user2").add()
+    u3 = provider.user("user3").add()
 
-    provider.group('group1').add(gid=1001).add_member(u1)
-    provider.group('group2').add(gid=1002).add_members([u1, u2, u3])
-    provider.group('group3').add(gid=1003)
+    provider.group("group1").add(gid=1001).add_member(u1)
+    provider.group("group2").add(gid=1002).add_members([u1, u2, u3])
+    provider.group("group3").add(gid=1003)
 
     client.sssd.start()
 
-    result = client.tools.id('user1')
+    result = client.tools.id("user1")
     assert result is not None
     assert result.memberof([1001, 1002])
 
-    result = client.tools.id('user2')
+    result = client.tools.id("user2")
     assert result is not None
     assert result.memberof([1002])
 
-    result = client.tools.id('user3')
+    result = client.tools.id("user3")
     assert result is not None
     assert result.memberof([1002])
 
@@ -311,24 +327,24 @@ def test_id__user_gids(client: Client, provider: GenericProvider):
         2. Users are members of correct groups
     :customerscenario: False
     """
-    u1 = provider.user('user1').add(uid=2001, gid=101)
-    u2 = provider.user('user2').add(uid=2002, gid=102)
-    u3 = provider.user('user3').add(uid=2003, gid=103)
+    u1 = provider.user("user1").add(uid=2001, gid=101)
+    u2 = provider.user("user2").add(uid=2002, gid=102)
+    u3 = provider.user("user3").add(uid=2003, gid=103)
 
-    provider.group('group1').add(gid=1001).add_member(u1)
-    provider.group('group2').add(gid=1002).add_members([u1, u2, u3])
+    provider.group("group1").add(gid=1001).add_member(u1)
+    provider.group("group2").add(gid=1002).add_members([u1, u2, u3])
 
     client.sssd.start()
 
-    result = client.tools.id(2001)
+    result = client.tools.id("2001")
     assert result is not None
     assert result.memberof([101, 1001, 1002])
 
-    result = client.tools.id(2002)
+    result = client.tools.id("2002")
     assert result is not None
     assert result.memberof([102, 1002])
 
-    result = client.tools.id(2003)
+    result = client.tools.id("2003")
     assert result is not None
     assert result.memberof([103, 1002])
 
@@ -354,23 +370,23 @@ def test_id__getpwnam_fully_qualified_names(client: Client, provider: GenericPro
         4. Users have correct ids
     :customerscenario: False
     """
-    u1 = provider.user('user1').add(uid=10001)
-    u2 = provider.user('user2').add(uid=10002)
+    provider.user("user1").add(uid=10001)
+    provider.user("user2").add(uid=10002)
 
-    client.sssd.domain['use_fully_qualified_names'] = 'true'
+    client.sssd.domain["use_fully_qualified_names"] = "true"
     client.sssd.start()
 
-    assert client.tools.id('user1') is None
-    assert client.tools.id('user2') is None
+    assert client.tools.id("user1") is None
+    assert client.tools.id("user2") is None
 
-    result = client.tools.id('user1@test')
+    result = client.tools.id("user1@test")
     assert result is not None
-    assert result.user.name == 'user1@test'
+    assert result.user.name == "user1@test"
     assert result.user.id == 10001
 
-    result = client.tools.id('user2@test')
+    result = client.tools.id("user2@test")
     assert result is not None
-    assert result.user.name == 'user2@test'
+    assert result.user.name == "user2@test"
     assert result.user.id == 10002
 
 
@@ -396,34 +412,43 @@ def test_id__case_insensitive(client: Client, provider: GenericProvider):
         3. Users are members of correct groups
     :customerscenario: False
     """
-    u1 = provider.user('user1').add(gid=101)
-    u2 = provider.user('user2').add(gid=102)
-    u3 = provider.user('user3').add(gid=103)
+    u1 = provider.user("user1").add(gid=101)
+    u2 = provider.user("user2").add(gid=102)
+    u3 = provider.user("user3").add(gid=103)
 
-    provider.group('group1').add(gid=1001).add_members([u1])
-    provider.group('group2').add(gid=1002).add_members([u1, u2])
-    provider.group('group3').add(gid=1003).add_members([u1, u2, u3])
+    provider.group("group1").add(gid=1001).add_members([u1])
+    provider.group("group2").add(gid=1002).add_members([u1, u2])
+    provider.group("group3").add(gid=1003).add_members([u1, u2, u3])
 
-    client.sssd.domain['case_sensitive'] = 'false'
+    client.sssd.domain["case_sensitive"] = "false"
     client.sssd.start()
 
     u1_groups = [101, 1001, 1002, 1003]
     u2_groups = [102, 1002, 1003]
     u3_groups = [103, 1003]
 
-    for name, groups in [('uSer1', u1_groups), ('useR1', u1_groups), ('uSER1', u1_groups),
-                         ('USEr2', u2_groups), ('uSEr2', u2_groups), ('usER2', u2_groups),
-                         ('USer3', u3_groups), ('uSer3', u3_groups), ('USER3', u3_groups),]:
+    for name, g in [
+        ("uSer1", u1_groups),
+        ("useR1", u1_groups),
+        ("uSER1", u1_groups),
+        ("USEr2", u2_groups),
+        ("uSEr2", u2_groups),
+        ("usER2", u2_groups),
+        ("USer3", u3_groups),
+        ("uSer3", u3_groups),
+        ("USER3", u3_groups)
+    ]:
         result = client.tools.id(name)
         assert result is not None
         assert result.user.name == name.lower()
-        assert result.memberof(groups)
+        assert result.memberof(g)
 
 
 @pytest.mark.topology(KnownTopologyGroup.AnyProvider)
 def test_id__fq_names_case_insensitive(client: Client, provider: GenericProvider):
     """
-    :title: Resolving user by id() with fq case insensitive name when 'case_sensitive' is 'false' and 'use_fully_qualified_names' is 'true'
+    :title: Resolving user by id() with fq case insensitive name when
+            'case_sensitive' is 'false' and 'use_fully_qualified_names' is 'true'
     :setup:
         1. Add 'user1', 'user2' and 'user3' to SSSD
         2. Set users gids
@@ -443,33 +468,33 @@ def test_id__fq_names_case_insensitive(client: Client, provider: GenericProvider
         3. Users are members of correct groups
     :customerscenario: False
     """
-    u1 = provider.user('user1').add(gid=101)
-    u2 = provider.user('user2').add(gid=102)
-    u3 = provider.user('user3').add(gid=103)
+    u1 = provider.user("user1").add(gid=101)
+    u2 = provider.user("user2").add(gid=102)
+    u3 = provider.user("user3").add(gid=103)
 
-    provider.group('group1').add(gid=1001).add_members([u1])
-    provider.group('group2').add(gid=1002).add_members([u1, u2])
-    provider.group('group3').add(gid=1003).add_members([u1, u2, u3])
+    provider.group("group1").add(gid=1001).add_members([u1])
+    provider.group("group2").add(gid=1002).add_members([u1, u2])
+    provider.group("group3").add(gid=1003).add_members([u1, u2, u3])
 
-    client.sssd.domain['use_fully_qualified_names'] = 'true'
-    client.sssd.domain['case_sensitive'] = 'false'
+    client.sssd.domain["use_fully_qualified_names"] = "true"
+    client.sssd.domain["case_sensitive"] = "false"
     client.sssd.start()
 
-    assert client.tools.id('user1') is None
-    assert client.tools.id('user2') is None
-    assert client.tools.id('user3') is None
+    assert client.tools.id("user1") is None
+    assert client.tools.id("user2") is None
+    assert client.tools.id("user3") is None
 
-    for name in ['User1@TesT', 'UseR1@TesT', 'UsER1@TesT']:
+    for name in ["User1@TesT", "UseR1@TesT", "UsER1@TesT"]:
         result = client.tools.id(name)
         assert result is not None
         assert result.memberof([101, 1001, 1002, 1003])
 
-    for name in ['uSer2@TeST', 'user2@TEsT', 'uSER2@tesT']:
+    for name in ["uSer2@TeST", "user2@TEsT", "uSER2@tesT"]:
         result = client.tools.id(name)
         assert result is not None
         assert result.memberof([102, 1002, 1003])
 
-    for name in ['USer3@TeST', 'uSer3@TeST', 'USER3@Test']:
+    for name in ["USer3@TeST", "uSer3@TeST", "USER3@Test"]:
         result = client.tools.id(name)
         assert result is not None
         assert result.memberof([103, 1003])
